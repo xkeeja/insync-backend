@@ -20,10 +20,10 @@ pytest
 yapf
 
 # API
-gcsfs
-google-cloud-storage
-mlflow
-s3fs
+#gcsfs
+#google-cloud-storage
+#mlflow
+#s3fs
 
 # utilities
 six>=1.14
@@ -43,3 +43,8 @@ opencv-python==4.6.0.66
 
 #Deep Learning
 tensorflow==2.11.0
+tensorflow-hub==0.12.0
+
+#encoding
+chardnet==5.0.0
+idna==
