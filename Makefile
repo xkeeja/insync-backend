@@ -63,4 +63,7 @@ pypi:
 
 # Our code
 run_api:
-	uvicorn in_sync.api.fast:app --reload
+	uvicorn api.fast:app --reload
+
+run_streamlit_test:
+	streamlit run streamlit_testing/app.py
