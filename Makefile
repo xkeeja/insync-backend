@@ -1,6 +1,12 @@
 # ----------------------------------
 #          INSTALL & TEST
 # ----------------------------------
+
+
+testalgo:
+	@python algo/movenet_algo.py
+
+
 install_requirements:
 	@pip install -r requirements.txt
 
