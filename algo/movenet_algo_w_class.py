@@ -1,7 +1,8 @@
 from posevisual.person import Joint
-from movenet_data import run_inference
+from movenet_load import load_image, load_model
 from matplotlib import pyplot as plt
-import seaborn as sns
+import numpy as np
+# import seaborn as sns
 import matplotlib.image as mpimg
 
 
@@ -28,6 +29,10 @@ def calculate_angles(keypoints , joint1_id, joint2_id):
     else:
         grad= abs((y2-y1)/(x2-x1))
         return np.arctan(grad)*180/np.pi +270
+
+
+
+
 def return_angles(keypoints, number_of_people):
     """Return array of lists with gradients of connecting body parts"""
     connecting_body_parts_id=[(4,2),(2,0),(0,1),(1,3),(5,6),(5,7),(7,9),
@@ -50,28 +55,45 @@ def return_angles(keypoints, number_of_people):
             person_angles.append(angle)
         all_angles.append(person_angles)
     return all_angles , joints, links
-output_frames, keypoints= run_inference()
-all_angles, joints, links = return_angles(keypoints,6)
-x_vals_1 = all_angles[0,:,1]*390
-y_vals_1 = all_angles[0,:,0]*480
-x_vals_2 = all_angles[1,:,1]*390
-y_vals_2 = all_angles[1,:,0]*480
-x_vals_3 = all_angles[2,:,1]*390
-y_vals_3 = all_angles[2,:,0]*280
-x_vals_4 = all_angles[3,:,1]*390
-y_vals_4 = all_angles[3,:,0]*280
-x_vals_5 = all_angles[4,:,1]*390
-y_vals_5 = all_angles[4,:,0]*280
-x_vals_6 = all_angles[5,:,1]*390
-y_vals_6 = all_angles[5,:,0]*280
 
-img = mpimg.imread("test_image/6people.webp")
-plt.imshow(img)
-fig = plt.gcf()
-#fig.scatter(x=x_vals_1, y=y_vals_1, hue =joints.id)
-# sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=joints.id)
-# sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =joints.id)
-# sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=joints.id)
-# sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =joints.id)
-# sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=joints.id)
-plt.show()
+
+image_processed = load_image("test_image/6people.webp")
+movenet = load_model()
+
+# Run model inference.
+outputs = movenet(image)
+# Output is a [1, 6, 56] tensor.
+keypoints = outputs['output_0']
+
+print (keypoints)
+
+# all_angles, joints, links = return_angles(keypoints,6)
+# x_vals_1 = all_angles[0,:,1]*390
+# y_vals_1 = all_angles[0,:,0]*480
+# x_vals_2 = all_angles[1,:,1]*390
+# y_vals_2 = all_angles[1,:,0]*480
+# x_vals_3 = all_angles[2,:,1]*390
+# y_vals_3 = all_angles[2,:,0]*280
+# x_vals_4 = all_angles[3,:,1]*390
+# y_vals_4 = all_angles[3,:,0]*280
+# x_vals_5 = all_angles[4,:,1]*390
+# y_vals_5 = all_angles[4,:,0]*280
+# x_vals_6 = all_angles[5,:,1]*390
+# y_vals_6 = all_angles[5,:,0]*280
+
+# img = mpimg.imread("test_image/6people.webp")
+# plt.imshow(img)
+# fig = plt.gcf()
+# #fig.scatter(x=x_vals_1, y=y_vals_1, hue =joints.id)
+# # sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=joints.id)
+# # sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =joints.id)
+# # sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=joints.id)
+# # sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =joints.id)
+# # sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=joints.id)
+# plt.show()
+
+
+# # Run model inference.
+# outputs = movenet(image)
+# # Output is a [1, 6, 56] tensor.
+# keypoints = outputs['output_0']
