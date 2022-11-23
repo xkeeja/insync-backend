@@ -59,3 +59,11 @@ pypi_test:
 
 pypi:
 	@twine upload dist/* -u $(PYPI_USERNAME)
+
+
+# Our code
+run_api:
+	uvicorn api.fast:app --reload
+
+run_streamlit_test:
+	streamlit run streamlit_testing/app.py
