@@ -1,3 +1,6 @@
+##############################################
+#   LE WAGON BASE
+#############################################
 # packaging
 pip>=9
 setuptools>=26
@@ -27,3 +30,16 @@ six>=1.14
 joblib
 memoized-property
 termcolor
+
+############################################
+#  IN_SYNC SPECIFIC BASE
+#############################################
+
+#Visualisation
+matplotlib==3.6.2
+
+#Video stream management
+opencv-python==4.6.0.66
+
+#Deep Learning
+tensorflow==2.11.0
