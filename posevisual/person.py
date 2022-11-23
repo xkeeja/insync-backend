@@ -48,13 +48,13 @@ x = Joint(1, 3)
 
 class Link:
 
-    link_def= {"left eye to left ear":(2,4),
-                             "left eye to nose":(2,0),
-                             "nose to right eye":(0,1),
-                             "right eye to right ear":(1,3),
-                             "right shoulder to left shoulder":(5,6),
-                             "left shoulder to left elbow":(8,6),
-                             "left elbow to left wrist" :(8,10),
+    link_def= {"right ear to right eye":(4,2),
+                             "right eye to nose":(2,0),
+                             "nose to left eye":(0,1),
+                             "left eye to left ear":(1,3),
+                             "left shoulder to right shoulder":(5,6),
+                             "right elbow to right shoulder ":(6,8),
+                             "right elbow to right wrist" :(8,10),
                              "right shoulder to right elbow":(5,7),
                              "right elbow to right wrist":(7,9),
                              "left shoulder to left hip":(6,12),

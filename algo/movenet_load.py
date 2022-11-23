@@ -14,15 +14,19 @@ def load_image(path : str):
     image = tf.compat.v1.image.decode_jpeg(image)
     image = tf.expand_dims(image, axis=0)
     # Resize and pad the image to keep the aspect ratio and fit the expected size.
-    image = tf.cast(tf.image.resize_with_pad(image, 256, 256), dtype=tf.int32)
+    image = tf.cast(tf.image.resize_with_pad(image, 192, 256), dtype=tf.int32)
     return image
 
 # Download the model from TF Hub.
-def load_model():
+def load_model(mode:str ='local'):
     """
     load model from tensorflow hub and make it ready for porediction
-    input : None
+    input : 'hub' or 'local'
     output : tensorflow model """
-    model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
-    movenet = model.signatures['serving_default']
-    return movenet
+    if mode == 'hub':
+        model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
+        movenet = model.signatures['serving_default']
+        return movenet
+    else:
+        model = tf.saved_model.load("../model/saved_model.pb")
+        return model
