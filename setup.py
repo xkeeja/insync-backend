@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 requirements = [x.strip() for x in content if 'git+' not in x]
 
 setup(name='in_sync',
-      version="1.0",
+      version="1.1",
       description="Project Description",
       packages=find_packages(),
       install_requires=requirements,
