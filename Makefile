@@ -53,3 +53,8 @@ pypi_test:
 
 pypi:
 	@twine upload dist/* -u $(PYPI_USERNAME)
+
+
+# Our code
+run_api:
+	uvicorn in_sync.api.fast:app --reload
