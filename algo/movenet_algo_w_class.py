@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 # import seaborn as sns
 import matplotlib.image as mpimg
+import os
 
 
 def calculate_angles(keypoints , joint1_id, joint2_id):
@@ -56,8 +57,13 @@ def return_angles(keypoints, number_of_people):
         all_angles.append(person_angles)
     return all_angles , joints, links
 
+image = mpimg.imread("./algo/test_image/6people_2.jpg")
+plt.imshow(image)
+plt.show()
 
-image_processed = load_image("test_image/6people.webp")
+"""
+path = os.path.join("..")
+image_processed = load_image("/test_image/6people_2.jpg")
 movenet = load_model()
 
 # Run model inference.
@@ -66,7 +72,7 @@ outputs = movenet(image)
 keypoints = outputs['output_0']
 
 print (keypoints)
-
+"""
 # all_angles, joints, links = return_angles(keypoints,6)
 # x_vals_1 = all_angles[0,:,1]*390
 # y_vals_1 = all_angles[0,:,0]*480
