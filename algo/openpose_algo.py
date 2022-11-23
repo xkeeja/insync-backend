@@ -383,6 +383,8 @@ test_data_4 = [[(252, 40, 0.9236832708120346, 0), (120, 57, 0.9238319098949432, 
  [(236, 37, 0.8946171849966049, 32), (107, 55, 0.895718052983284, 33)],
  [(265, 37, 0.8413965702056885, 34), (131, 55, 0.7821370661258698, 35)]]
 
+
+
 def calculate_angles(feature1_list, feature2_list):
     x1 , y1 = feature1_list[0:2]
     x2 , y2 = feature2_list[0:2]
@@ -394,17 +396,16 @@ def calculate_angles(feature1_list, feature2_list):
         else:
             return 270
     elif delta_x >0 and delta_y>0:
-        grad= (y2-y1)/(x2-x1)
+        grad= abs((y2-y1)/(x2-x1))
         return np.arctan(grad)*180/np.pi
     elif delta_x  <0 and delta_y>0:
-        grad = (y2-y1)/(x1-x2)
+        grad = abs((y2-y1)/(x1-x2))
         return np.arctan(grad)*180/np.pi +90
     elif delta_x< 0 and delta_y< 0:
-
-        grad = (y1-y2)/(x2-x1)
+        grad = abs((y1-y2)/(x2-x1))
         return np.arctan(grad)*180/np.pi +180
     else:
-        grad= (y2-y1)/(x2-x1)
+        grad= abs((y2-y1)/(x2-x1))
         return np.arctan(grad)*180/np.pi +270
 
 
@@ -442,12 +443,12 @@ def return_angles(data):
                               (11,12),(12,13)]
     output = []
 
-    for connect in connecting_body_parts_id:
-        feature1_list = data[connect[0]]
-        feature2_list = data[connect[1]]
+    for connection in connecting_body_parts_id:
+        feature1_list = data[connection[0]]
+        feature2_list = data[connection[1]]
         # if len(feature1_list)!= 9 or len(feature2_list)!=9:
         #     continue
-        output_mini=[(connect)]
+        output_mini=[(connection)]
         for i in range (min(len(feature1_list),len(feature2_list))):
             output_mini.append(calculate_angles(feature1_list[i],feature2_list[i]))
 
@@ -458,6 +459,6 @@ angles= return_angles(test_data_4)
 for angle in angles:
     print(angle)
 
-# for angle in angles:
-#     print(angle[2]-gradient[1]
-#           , gradient[0])
+for angle in angles:
+    print(angle[2]-angle[1], angle[0])
+    print("variance:" , np.var(angle[1:3]))
