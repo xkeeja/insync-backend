@@ -10,4 +10,4 @@ raw_data/
 *.pdf:Zone.Identifier
 /build
 /dist
-*/.jpg:Zone.Identifier
+*.jpg:Zone.Identifier
