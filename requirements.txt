@@ -42,4 +42,15 @@ matplotlib==3.6.2
 opencv-python==4.6.0.66
 
 #Deep Learning
-tensorflow==2.11.0
+# Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
+tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
+tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
+tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
+
+#streamlit
+streamlit
+python-multipart
+
+#api
+fastapi
+uvicorn
