@@ -2,3 +2,4 @@ opencv-python
 fastapi
 uvicorn
 python-multipart
+google-cloud-storage
