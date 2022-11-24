@@ -1,3 +1,7 @@
+import sys
+sys.path.insert(1,"../algo")
+
+
 """
 module for visualisation
 """
