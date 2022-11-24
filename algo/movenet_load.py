@@ -2,7 +2,7 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import cv2
-import numpy
+import numpy as np
 from colorama import Fore, Style
 import time
 
@@ -35,29 +35,11 @@ def load_model(mode:str ='local'):
         model = tf.saved_model.load("../model/saved_model.pb")
         return model
 
-def preprocess_image(image, new_width, new_height):
-    start = time.time()
-    image = cv2.resize(image, (new_width, new_height))
-    # Resize to the target shape and cast to an int32 vector
-    input_image = tf.cast(tf.image.resize_with_pad(image, new_width, new_height), dtype=tf.int32)
-    # Create a batch (input tensor)
-    input_image = tf.expand_dims(input_image, axis=0)
-
-    print(Fore.BLUE + f"image processed in: {time.time()-start}s" + Style.RESET_ALL)
-    print(input_image.shape)
-    return input_image
-
-def predict(model, input_image):
-    # Run model inference.
-    start = time.time()
-    outputs = model(input_image)
-    # Output is a [1, 6, 56] tensor that we can reshape
-    keypoints = outputs['output_0'].numpy()[:,:,:51].reshape((6,17,3))
-    print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
-    return keypoints
 
 def load_video_and_release(path : str, output_format: str, output_name :str):
+    """
 
+    """
     # COnversion on the video in a opencv Videocapture (collection of frames)
     vid = cv2.VideoCapture(path)
     fps = int(vid.get(cv2.CAP_PROP_FPS))
@@ -74,16 +56,85 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
     elif output_format =="mp4":
         writer = cv2.VideoWriter(f"{output_name}.mp4",
         cv2.VideoWriter_fourcc(*"mp4v"), fps,(width,height))
+
     return vid, writer, fps, frame_count, width, height
 
+def preprocess_image(image, new_width, new_height):
+    """
+    take an frame of a video converted to an image through opencv,
+    wth the new_width and new height  for reshaping purpose.
+    Based on the image original definition :
+    - (480p: 854px by 480px)
+    - (720p: 854px by 480px)
+    - (1080p: 854px by 480px)
+    """
+    resize_table = {480}
+    start = time.time()
+    image = cv2.resize(image, (new_width, new_height))
+    # Resize to the target shape and cast to an int32 vector
+    input_image = tf.cast(tf.image.resize_with_pad(image, new_width, new_height), dtype=tf.int32)
+    # Create a batch (input tensor)
+    input_image = tf.expand_dims(input_image, axis=0)
+
+    print(Fore.BLUE + f"image processed in: {time.time()-start}s" + Style.RESET_ALL)
+    print(input_image.shape)
+    return input_image
+
+def predict(model, input_image):
+    """
+
+    """
+    # Run model inference.
+    start = time.time()
+    outputs = model(input_image)
+    # Output is a [1, 6, 56] tensor that we can reshape
+    keypoints = outputs['output_0'].numpy()[:,:,:51].reshape((6,17,3))
+    print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
+    return keypoints
+
+def drawing_joints(keypoints, number_people, frame):
+    """
+
+    """
+    start=time.time()
+    for person_id in range(number_people):
+        print(np.mean(keypoints[person_id,:,2]))
+        if np.mean(keypoints[person_id,:,2]) < 0.1:
+            pass
+        else:
+            print("plotting ", person_id)
+            x_vals = keypoints[person_id,:,1]*256
+            y_vals = keypoints[person_id,:,0]*448
+            frame = cv2.drawMarker(
+                img=frame,
+                position = (int(x_vals),int(y_vals)),
+                color=(255,0,0),
+                markerType=cv2.MARKER_CROSS,
+                markerSize= 10,
+                thickness= 1,
+                line_type=8
+            )
+            print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
+    return frame
+
+
 def predict_on_stream (vid, writer, model):
+    """
+
+    """
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
             image = frame.copy()
+            #Preprocessing the image
             input_image = preprocess_image(image, 256, 448)
-            predict(model, input_image)
-            frame = cv2.flip(frame,0)
+            # making prediction
+            keypoints = predict(model, input_image)
+            keypoints_normal_scale = np.squeeze(np.multiply(keypoints, [256,448,1]))
+            drawing_joints(keypoints_normal_scale, number_people=2)
+            #frame = cv2.flip(frame,0)
+            frame = drawing_joints(keypoints, number_people=2, frame=frame)
+
             writer.write(frame)
         else:
             break
