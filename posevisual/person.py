@@ -48,7 +48,11 @@ x = Joint(1, 3)
 
 class Link:
 
-    link_def= {"right ear to right eye":(4,2),
+    def __init__(self, id:int):
+        self.id = id
+        pass
+
+    link_def= {1 : ["right ear to right eye", (4,2), ""],
                              "right eye to nose":(2,0),
                              "nose to left eye":(0,1),
                              "left eye to left ear":(1,3),
@@ -64,3 +68,13 @@ class Link:
                              "left knee to left foot":(14,16),
                              "right hip to right knee":(11,13),
                              "right knee to right foot":(13,15)}
+
+
+class Person:
+
+    def __init__(self, id:int):
+        self.id = id
+        self.joints = [Joint(i, self.id) for i in range(17)]
+
+Bob = Person(1)
+print(Bob.joints[5].color)
