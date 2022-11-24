@@ -1,8 +1,6 @@
 import time
 import numpy as np
-from movenet_data import run_inference
-from matplotlib import pyplot as plt
-import matplotlib.image as mpimg
+
 from posevisual.person import Joint
 
 
@@ -97,83 +95,3 @@ def similarity_scorer(angles , number_of_people , strictness=1 ):
             max_link = key
 
     return link_scores_list , frame_score , max_link , max, link_scores_dict
-
-
-
-
-
-
-
-#running predictions
-start=time.time()
-output_frames, keypoints, initial_shape , gif_name= run_inference()
-end = time.time()
-print("model time ", end-start,
-      "per frame" ,(end-start)/95)
-print(keypoints)
-
-
-
-#calculating angles
-start = time.time()
-angles ,all_angles_with_joints= np.array(return_angles(keypoints,6))
-end = time.time()
-print("time:" ,end-start)
-print(angles)
-
-
-
-
-#scoring algorithm
-start=time.time()
-link_scores,frame_score  ,max_link , max , link_scores_dict= similarity_scorer(angles, 2)
-end= time.time()
-print("scoring time", end-start)
-
-print(link_scores)
-print(frame_score)
-
-
-for x in all_angles_with_joints[0]:
-    print(f"Angle: {x[0]}, Joint 1: {x[1].name}, Joint 2: {x[2].name}")
-
-
-
-import seaborn as sns
-import matplotlib.image as mpimg
-img = mpimg.imread(gif_name)
-plt.imshow(img)
-
-features = range(17)
-
-
-x_vals_1 = keypoints[0,:,1]*initial_shape[0]
-y_vals_1 = keypoints[0,:,0]*initial_shape[1]
-
-x_vals_2 = keypoints[1,:,1]*initial_shape[0]
-y_vals_2 = keypoints[1,:,0]*initial_shape[1]
-
-x_vals_3 = keypoints[2,:,1]*initial_shape[0]
-y_vals_3 = keypoints[2,:,0]*initial_shape[1]
-
-x_vals_4 = keypoints[3,:,1]*initial_shape[0]
-y_vals_4 = keypoints[3,:,0]*initial_shape[1]
-
-x_vals_5 = keypoints[4,:,1]*initial_shape[0]
-y_vals_5 = keypoints[4,:,0]*initial_shape[1]
-
-x_vals_6 = keypoints[5,:,1]*initial_shape[0]
-y_vals_6 = keypoints[5,:,0]*initial_shape[1]
-
-
-sns.scatterplot(x=x_vals_1, y=y_vals_1, hue =features)
-
-sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=features)
-# sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
-
-# sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
-# sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
-
-# sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
-
-plt.show()

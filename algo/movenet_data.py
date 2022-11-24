@@ -121,9 +121,9 @@ def load_gif():
     """
     Loads the gif and return its details
     """
-
+    gif_name ="raw_data/squatingman.jpeg"
     # Load the gif
-    gif = cv2.VideoCapture("Duet_clip_1_In_Sync.mp4")
+    gif = cv2.VideoCapture(gif_name)
     # Get the frame count
     frame_count = int(gif.get(cv2.CAP_PROP_FRAME_COUNT))
     # Display parameter
@@ -140,7 +140,7 @@ def load_gif():
     initial_shape.append(int(gif.get(cv2.CAP_PROP_FRAME_WIDTH)))
     initial_shape.append(int(gif.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
-    return gif, frame_count, output_frames, initial_shape
+    return gif, frame_count, output_frames, initial_shape , gif_name
 
 
 
@@ -150,7 +150,7 @@ def run_inference():
     """
 
     # Load the gif
-    gif, frame_count, output_frames, initial_shape = load_gif()
+    gif, frame_count, output_frames, initial_shape, gif_name = load_gif()
     # Set the progress bar to 0. It ranges from the first to the last frame
 
     # Loop while the gif is opened
@@ -210,8 +210,4 @@ def run_inference():
 
     print("Completed !")
 
-    return output_frames, keypoints
-
-
-
-print(run_inference())
+    return output_frames, keypoints , initial_shape , gif_name
