@@ -123,7 +123,7 @@ def load_gif():
     """
 
     # Load the gif
-    gif = cv2.VideoCapture("raw_data/dance.gif")
+    gif = cv2.VideoCapture("raw_data/6people.webp")
     # Get the frame count
     frame_count = int(gif.get(cv2.CAP_PROP_FRAME_COUNT))
     # Display parameter

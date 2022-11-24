@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
 
+
 def calculate_angles(feature1, feature2):
     x1 , y1 = feature1[0] , feature1[1]
     x2 , y2 = feature2[0], feature2[1]
@@ -92,7 +93,7 @@ for x in range(16):
 
 import seaborn as sns
 import matplotlib.image as mpimg
-img = mpimg.imread("raw_data/dance.gif")
+img = mpimg.imread("raw_data/6people.webp")
 plt.imshow(img)
 
 features = range(17)
@@ -104,33 +105,33 @@ print(keypoints.shape)
 
 print(keypoints)
 
-x_vals_1 = keypoints[0,:,1]*409
-y_vals_1 = keypoints[0,:,0]*480
+x_vals_1 = keypoints[0,:,1]*390
+y_vals_1 = keypoints[0,:,0]*280
 
-x_vals_2 = keypoints[1,:,1]*409
-y_vals_2 = keypoints[1,:,0]*480
+x_vals_2 = keypoints[1,:,1]*390
+y_vals_2 = keypoints[1,:,0]*280
 
-# x_vals_3 = keypoints[2,:,1]*390
-# y_vals_3 = keypoints[2,:,0]*280
+x_vals_3 = keypoints[2,:,1]*390
+y_vals_3 = keypoints[2,:,0]*280
 
-# x_vals_4 = keypoints[3,:,1]*390
-# y_vals_4 = keypoints[3,:,0]*280
+x_vals_4 = keypoints[3,:,1]*390
+y_vals_4 = keypoints[3,:,0]*280
 
-# x_vals_5 = keypoints[4,:,1]*390
-# y_vals_5 = keypoints[4,:,0]*280
+x_vals_5 = keypoints[4,:,1]*390
+y_vals_5 = keypoints[4,:,0]*280
 
-# x_vals_6 = keypoints[5,:,1]*390
-# y_vals_6 = keypoints[5,:,0]*280
+x_vals_6 = keypoints[5,:,1]*390
+y_vals_6 = keypoints[5,:,0]*280
 
 
 sns.scatterplot(x=x_vals_1, y=y_vals_1, hue =features)
 
 sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=features)
-# sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
+sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
 
-# sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
-# sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
+sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
+sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
 
-# sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
+sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
 
 plt.show()
