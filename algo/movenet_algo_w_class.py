@@ -61,9 +61,9 @@ def return_angles(keypoints, number_of_people):
 
 # Preprocessed the picture
 start = time.time()
-image_processed = load_image("./algo/test_image/5people_640x480.jpg")
+image_processed = load_image("./algo/test_image/test_crossign_arms.jpg")
 print(Fore.BLUE + f"image processed in: {time.time()-start}s" + Style.RESET_ALL)
-
+print(image_processed.shape)
 # loading the model
 start = time.time()
 movenet = load_model("hub")
@@ -78,18 +78,21 @@ print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + S
 
 print (keypoints)
 number_people = 6
-all_angles, joints, links = return_angles(keypoints,number_people)
 
+
+start = time.time()
+all_angles, joints, links = return_angles(keypoints,number_people)
+print(Fore.BLUE + f"angle calculation output in: {time.time()-start}s" + Style.RESET_ALL)
 print(all_angles)
 
-width , height = 640 , 480
+width , height = 1280 , 720
 
 
-img = mpimg.imread("./algo/test_image/5people_640x480.jpg")
+img = mpimg.imread("./algo/test_image/test_crossign_arms.jpg")
 plt.imshow(img)
 fig = plt.gcf()
 
-
+start = time.time()
 for person_id in range(number_people):
     print(np.mean(keypoints[person_id,:,2]))
     if np.mean(keypoints[person_id,:,2]) < 0.1:
@@ -99,7 +102,7 @@ for person_id in range(number_people):
         x_vals = keypoints[person_id,:,1]*width
         y_vals = keypoints[person_id,:,0]*height
         plt.scatter(x=x_vals, y=y_vals, marker="+", color=[Joint(i, person_id).color for i in range(17)])
-
+print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
 
 # lines = [[(130, 120), (400, 300)]]
 # c = np.array([(1, 0, 0, 1)])
