@@ -7,7 +7,7 @@ from colorama import Fore, Style
 import time
 
 #Import calculation functions
-from calculations import return_angles , similarity_scorer
+from algo.calculations import return_angles , similarity_scorer
 
 
 # Load the input image.
@@ -52,8 +52,8 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
     frame_count = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"Video analysed: /n fps: {fps}, *\
-          /n frame count: {frame_count} , /n width : {width}, height : {height}")
+    print(f"Video analysed: \n fps: {fps}, *\
+          \n frame count: {frame_count} , \n width : {width}, \n height : {height}")
 
     # creation onf the writer to recompose the video later on
     if output_format =="avi":
@@ -138,20 +138,6 @@ def calculate_score(keypoints , number_of_people):
     return frame_score , max_link
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def predict_on_stream (vid, writer, model):
     """
 
@@ -169,7 +155,7 @@ def predict_on_stream (vid, writer, model):
             #print(keypoints)
             #Calculate scores
 
-            frame_score , max_link  = calculate_score(keypoints , 2)
+            frame_score , max_link  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
 
             print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
@@ -188,31 +174,3 @@ def predict_on_stream (vid, writer, model):
     writer.release()
 
     return vid , all_scores
-
-
-
-
-
-
-
-vid, writer, fps, frame_count, width, height = load_video_and_release("1125.mp4" , "mp4", "test_output")
-model = load_model("hub")
-start = time.time()
-vid , all_scores = predict_on_stream(vid, writer, model)
-end  = time.time()
-
-
-
-import matplotlib.pyplot as plt
-print(f"ALL SCORES: {all_scores} , MEAN SCORE:{np.mean(all_scores)}")
-
-
-
-max_frame = (all_scores.index(max(all_scores))+1)*8.25 /255
-
-
-print("time for whole thing" , end-start)
-
-
-plt.plot(all_scores)
-plt.show()
