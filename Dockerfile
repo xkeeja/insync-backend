@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.8.12-slim
+FROM python:3.8.12-slim
 
 COPY api /api
 COPY requirements_docker.txt /requirements.txt

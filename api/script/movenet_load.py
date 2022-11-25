@@ -6,6 +6,10 @@ import numpy as np
 from colorama import Fore, Style
 import time
 
+#Import calculation functions
+from api.script.calculations import return_angles, similarity_scorer
+
+
 # Load the input image.
 def load_image(path : str):
     """
@@ -34,7 +38,7 @@ def load_model(mode:str ='local'):
         model = model.signatures['serving_default']
     else:
         model = tf.saved_model.load("../model/saved_model.pb")
-    print(Fore.BLUE + f"model loade in: {time.time()-start}s" + Style.RESET_ALL)
+    print(Fore.BLUE + f"model loads in: {time.time()-start}s" + Style.RESET_ALL)
     return model
 
 
@@ -42,14 +46,14 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
     """
 
     """
-    # COnversion on the video in a opencv Videocapture (collection of frames)
+    # Conversion on the video in a opencv Videocapture (collection of frames)
     vid = cv2.VideoCapture(path)
     fps = int(vid.get(cv2.CAP_PROP_FPS))
     frame_count = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"Video analysed: /n fps: {fps}, *\
-          /n frame count: {frame_count} , /n width : {width}, height : {height}")
+    print(f"Video analysed: \n fps: {fps}, *\
+          \n frame count: {frame_count} , \n width : {width}, \n height : {height}")
 
     # creation onf the writer to recompose the video later on
     if output_format =="avi":
@@ -84,7 +88,7 @@ def preprocess_image(image, new_width, new_height):
 
 def predict(model, input_image):
     """
-
+    Use the model to predict the keypoints given a reshaped input_image.
     """
     # Run model inference.
     start = time.time()
@@ -94,9 +98,9 @@ def predict(model, input_image):
     print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
     return keypoints
 
-def drawing_joints(keypoints, number_people, frame):
+def drawing_joints(keypoints, number_people , frame):
     """
-
+    Plot the positions of the joints on a frame.
     """
     start=time.time()
     for person_id in range(number_people):
@@ -122,10 +126,23 @@ def drawing_joints(keypoints, number_people, frame):
     return frame
 
 
+def calculate_score(keypoints , number_of_people):
+    """
+    Calculate the angles between joints given the keypoints.
+    Give a similariy score for the the frame.
+    """
+    start = time.time()
+    all_angles, all_angles_with_joints =  return_angles(keypoints , number_of_people)
+    link_scores_list , frame_score , max_link , max, link_scores_dict=similarity_scorer(all_angles , number_of_people , strictness=1 )
+    print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
+    return frame_score , max_link
+
+
 def predict_on_stream (vid, writer, model):
     """
 
     """
+    all_scores = []
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
@@ -135,7 +152,13 @@ def predict_on_stream (vid, writer, model):
             # making prediction
             keypoints = predict(model, input_image)
             keypoints= np.squeeze(np.multiply(keypoints, [1080,1920,1]))
-            print(keypoints)
+            #print(keypoints)
+            #Calculate scores
+
+            frame_score , max_link  = calculate_score(keypoints , number_of_people=2)
+            all_scores.append(frame_score)
+
+            print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
             #frame = cv2.flip(frame,0)
             frame = drawing_joints(keypoints, number_people=2, frame=frame)
             frame_rgb = cv2.resize(
@@ -147,5 +170,7 @@ def predict_on_stream (vid, writer, model):
             writer.write(frame_rgb)
         else:
             break
+
     writer.release()
-    return vid
+
+    return vid , all_scores

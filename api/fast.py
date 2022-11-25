@@ -5,6 +5,7 @@ import subprocess
 import os
 import uuid
 import cv2
+import numpy as np
 
 from api.script.movenet_load import load_video_and_release, load_model, predict_on_stream
 
@@ -58,11 +59,11 @@ def stats_to_st(file: UploadFile = File(...)):
     
 
 @app.get("/vid_processed")
-def process_vid(vid_name, output_name):    
+def process_vid(vid_name, output_name, frame_count, fps):    
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
     
-    predict_on_stream(vid, writer, app.state.model)
-    
+    vid, all_scores = predict_on_stream(vid, writer, app.state.model)
+    timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
     
     # compress video output to smaller size
     my_uuid = uuid.uuid4()
@@ -80,5 +81,7 @@ def process_vid(vid_name, output_name):
     
     
     return {
-        'output_url': blob.public_url
+        'output_url': blob.public_url,
+        'timestamps': list(timestamps),
+        'scores': all_scores
     }
