@@ -37,6 +37,7 @@ termcolor
 
 #Visualisation
 matplotlib==3.6.2
+colorama
 
 #Video stream management
 opencv-python==4.6.0.66
@@ -60,4 +61,3 @@ python-multipart
 #api
 fastapi
 uvicorn
-

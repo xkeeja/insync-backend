@@ -4,7 +4,7 @@ import cv2
 
 #Display libraries
 import matplotlib.pyplot as plt
-from IPython.display import HTML, display
+#from IPython.display import HTML, display
 
 #Calculations and Deep Learning library
 import numpy as np
@@ -98,7 +98,7 @@ def draw_edges(denormalized_coordinates, frame, edges_colors, threshold=0.11):
                 thickness=2,
                 lineType=cv2.LINE_AA # Gives anti-aliased (smoothed) line which looks great for curves
             )
-
+'''
 def progress(value, max=100):
     """
     Returns an HTML progress bar with a certain value. Used within each step
@@ -115,7 +115,7 @@ def progress(value, max=100):
       </progress>
   """.format(value=value,
                 max=max))
-
+'''
 
 def load_gif():
     """
