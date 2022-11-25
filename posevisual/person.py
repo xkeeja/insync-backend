@@ -2,8 +2,6 @@
 module for visualisation
 
 """
-
-
 joint_def={
     0: ["nose", "", "black"],
     1: ["eye", "left", "green"],
@@ -26,19 +24,28 @@ joint_def={
 
 class Joint:
 
-
     def __init__(self, id :int, person_id : int):
         self.person_id = person_id
         self.id = id
         self.name = " ".join(joint_def[id][0:2])
         self.color = joint_def[id][2]
+        self.x = None # intented to be a float x coordinate
+        self.y = None # intented to be a float y coordinate
 
     def add_coord(self, x : float, y : float):
+        '''
+        Inputs : coordinate x, y of the joint after detection
+        outputs : joint itslef with coordinates updated
+        '''
         self.x = x
         self.y = y
         return self
 
     def add_confidence(self, confidence : float):
+        '''
+        Inputs : confidence score from pose detection model for this joint
+        outputs : joint itself with confidence scores updated
+        '''
         self.confidence = confidence
         return self
 
@@ -66,16 +73,29 @@ link_def= {
     }
 
 
-
-
-
-
 class Link:
 
-    def __init__(self, id:int):
+    def __init__(self, id:int, person_id :int):
         self.id = id
-        pass
+        self.person_id = person_id
+        self.joint1_id = link_def[id][1][0]
+        self.joint2_id = link_def[id][1][1]
+        self.name = link_def[id][2]
+        self.color = "yellow" # by default the color is yellow
 
+
+    def add_joints(self, joint1, joint2):
+        self.joints = (joint1, joint2)
+        return self
+
+
+    def set_color(self, color):
+        self.color = color
+        return self
+
+    def add_score(self, similarity_score :float):
+        self.similarity_score = similarity_score
+        return self
 
 
 
@@ -83,7 +103,17 @@ class Person:
 
     def __init__(self, id:int):
         self.id = id
-        self.joints = [Joint(i, self.id) for i in range(17)]
+        self.joints = [Joint(k, id) for k in range(17)]
 
-Bob = Person(1)
-print(Bob.joints[5].color)
+    def update_joints(self, x_vect, y_vect, conf_vect):
+        self.joints = [joint.add_coord(x,y).add_confidence(confidence) \
+            for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect)]
+        return self
+
+    def create_links(self):
+        self.links_empty = [Link(k, self.id) for k in range(16)]
+        self.links = [link.add_joints(
+            self.joints[link.joint1_id],
+            self.joints[link.joint2_id]
+            ) for link in self.links_empty]
+        return self
