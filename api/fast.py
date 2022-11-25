@@ -1,13 +1,16 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import storage
-import cv2
 import subprocess
 import os
+import uuid
+import cv2
+
+from api.script.movenet_load import load_video_and_release, load_model, predict_on_stream
 
 
 app = FastAPI()
-# app.state.model = load_model()
+app.state.model = load_model(mode='hub')
 SYNC_BUCKET = 'sync_testinput'
 
 
@@ -25,46 +28,47 @@ def root():
     return {'greeting': 'Hello from in_sync'}
 
 
-@app.post("/vid_process_from_st")
-def process_from_st(file: UploadFile = File(...)):
+@app.post("/vid_stats")
+def stats_to_st(file: UploadFile = File(...)):
     # video file loading
     vid_name = file.filename
     uploaded_video = file.file
+    output_name = 'output'
+    
     
     # open video file
     with open(vid_name, mode='wb') as f:
         f.write(uploaded_video.read())
-        
-    # load video file into OpenCV
-    # vidcap = cv.VideoCapture(vid_name)
-    # frame_count = int(vidcap.get(cv.CAP_PROP_FRAME_COUNT))
+    
     
     cap = cv2.VideoCapture(vid_name)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    output_name = "output.mp4"
-    output_width = 854
-    output_height = int(height * (output_width / width))
-    writer = cv2.VideoWriter(output_name,
-    cv2.VideoWriter_fourcc(*"mp4v"), fps,(output_width,output_height))
-    while(cap.isOpened()):
-        ret, frame = cap.read()
-        if ret==True:
-            frame = cv2.flip(frame,0)
-            frame = cv2.resize(frame, (output_width, output_height), interpolation = cv2.INTER_AREA)
-            writer.write(frame)
-        else:
-            break
     
-    writer.release()
+    
+    return {
+        'frame_count': frame_count,
+        'fps': fps,
+        'dim': f'{width} x {height}',
+        'vid_name': vid_name,
+        'output_name': output_name
+            }
+    
+
+@app.get("/vid_processed")
+def process_vid(vid_name, output_name):    
+    vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
+    
+    predict_on_stream(vid, writer, app.state.model)
     
     
     # compress video output to smaller size
-    output_lite = 'output_lite.mp4'
+    my_uuid = uuid.uuid4()
+    output_lite = f'output_lite_{my_uuid}.mp4'
     current_dir = os.path.abspath('.')
-    result = subprocess.run(f'ffmpeg -i {current_dir}/{output_name} -b 800k {current_dir}/{output_lite} -y', shell=True)
+    result = subprocess.run(f'ffmpeg -i {current_dir}/{output_name}.mp4 -b 800k {current_dir}/{output_lite} -y', shell=True)
     print(result)
     
     
@@ -74,14 +78,7 @@ def process_from_st(file: UploadFile = File(...)):
     blob = bucket.blob(output_lite)
     blob.upload_from_filename(output_lite)
     
-    blob_status = False
-    while blob_status == False:
-        blob_status = blob.exists()
     
     return {
-        'frame_count': frame_count,
-        'fps': fps,
-        'dim': f'{width} x {height}',
-        'dir': current_dir,
         'output_url': blob.public_url
-            } 
+    }

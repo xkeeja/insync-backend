@@ -7,12 +7,30 @@ uploaded_video = st.file_uploader("**Upload video for evaluation**", type=(['mp4
 
 #If video has been uploaded
 if uploaded_video:
-    url = "http://127.0.0.1:8000/vid_process_from_st"
-    # url = "https://sync-eagwezifvq-an.a.run.app/vid_process_from_st"
+    url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     
     start_time = time.time()
-    response = requests.post(url, files=files).json()
+    post_response = requests.post(url, files=files).json()
     
-    st.write(response)
+    st.write(post_response)
     st.write("--- %s seconds ---" % (time.time() - start_time))
+    
+    st.video(uploaded_video)
+    
+
+    if post_response:
+        if st.button('Analyse synchronization'):
+            
+            st.write('Processing...')
+            url = "http://127.0.0.1:8000/vid_processed"
+            params = {"vid_name": post_response['vid_name'], "output_name": post_response['output_name']}
+            
+            start_time = time.time()
+            get_response = requests.get(url, params=params).json()
+            
+            st.write(get_response)
+            st.write("--- %s seconds ---" % (time.time() - start_time))
+
+
+            st.video(get_response['output_url'])
