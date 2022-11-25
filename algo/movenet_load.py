@@ -7,7 +7,7 @@ from colorama import Fore, Style
 import time
 
 #Import calculation functions
-from calculations import return_angles , similarity_scorer
+from algo.calculations import return_angles , similarity_scorer
 
 
 # Load the input image.
@@ -138,20 +138,6 @@ def calculate_score(keypoints , number_of_people):
     return frame_score , max_link
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def predict_on_stream (vid, writer, model):
     """
 
@@ -188,31 +174,3 @@ def predict_on_stream (vid, writer, model):
     writer.release()
 
     return vid , all_scores
-
-
-
-
-
-
-
-vid, writer, fps, frame_count, width, height = load_video_and_release("1125.mp4" , "mp4", "test_output")
-model = load_model("hub")
-start = time.time()
-vid , all_scores = predict_on_stream(vid, writer, model)
-end  = time.time()
-
-
-
-import matplotlib.pyplot as plt
-print(f"ALL SCORES: {all_scores} , MEAN SCORE:{np.mean(all_scores)}")
-
-
-
-max_frame = (all_scores.index(max(all_scores))+1)*8.25 /255
-
-
-print("time for whole thing" , end-start)
-
-
-plt.plot(all_scores)
-plt.show()
