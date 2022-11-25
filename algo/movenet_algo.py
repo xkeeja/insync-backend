@@ -144,7 +144,7 @@ import matplotlib.image as mpimg
 img = mpimg.imread(gif_name)
 plt.imshow(img)
 
-features = range(17)
+
 
 
 x_vals_1 = keypoints[0,:,1]*initial_shape[0]
@@ -165,15 +165,15 @@ y_vals_5 = keypoints[4,:,0]*initial_shape[1]
 x_vals_6 = keypoints[5,:,1]*initial_shape[0]
 y_vals_6 = keypoints[5,:,0]*initial_shape[1]
 
-
+features = range(17)
 sns.scatterplot(x=x_vals_1, y=y_vals_1, hue =features)
 
 sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=features)
-# sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
+sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
 
-# sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
-# sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
+sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
+sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
 
-# sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
+sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
 
 plt.show()
