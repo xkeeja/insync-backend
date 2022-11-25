@@ -131,15 +131,20 @@ def predict_on_stream (vid, writer, model):
         if ret==True:
             image = frame.copy()
             #Preprocessing the image
-            input_image = preprocess_image(image, 256, 128)
+            input_image = preprocess_image(image, 256, 256)
             # making prediction
             keypoints = predict(model, input_image)
-            keypoints_normal_scale = np.squeeze(np.multiply(keypoints, [1080,1920,1]))
-            print(keypoints_normal_scale)
+            keypoints= np.squeeze(np.multiply(keypoints, [1080,1920,1]))
+            print(keypoints)
             #frame = cv2.flip(frame,0)
-            frame = drawing_joints(keypoints_normal_scale, number_people=2, frame=frame)
+            frame = drawing_joints(keypoints, number_people=2, frame=frame)
+            frame_rgb = cv2.resize(
+                    frame,
+                    (1920, 1080),
+                    interpolation=cv2.INTER_LANCZOS4
+            ) # OpenCV processes BGR images instead of RGB
 
-            writer.write(frame)
+            writer.write(frame_rgb)
         else:
             break
     writer.release()
