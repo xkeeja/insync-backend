@@ -125,6 +125,10 @@ def drawing_joints(keypoints, number_people , frame):
     print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
+def add_text(frame, count: int):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    return cv2.putText(frame, f'{count}', (10,450), font, 3, (0, 255, 0), 2, cv2.LINE_AA)
+
 
 def calculate_score(keypoints , number_of_people):
     """
@@ -143,9 +147,11 @@ def predict_on_stream (vid, writer, model):
 
     """
     all_scores = []
+    count = 0
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
+            count+=1
             image = frame.copy()
             #Preprocessing the image
             input_image = preprocess_image(image, 256, 256)
@@ -161,13 +167,14 @@ def predict_on_stream (vid, writer, model):
             print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
             #frame = cv2.flip(frame,0)
             frame = drawing_joints(keypoints, number_people=2, frame=frame)
-            frame_rgb = cv2.resize(
+            frame_resize = cv2.resize(
                     frame,
                     (1920, 1080),
                     interpolation=cv2.INTER_LANCZOS4
             ) # OpenCV processes BGR images instead of RGB
+            frame_text = add_text(frame_resize, count)
 
-            writer.write(frame_rgb)
+            writer.write(frame_text)
         else:
             break
 
