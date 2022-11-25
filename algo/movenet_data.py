@@ -121,7 +121,7 @@ def load_gif():
     """
     Loads the gif and return its details
     """
-    gif_name ="raw_data/squatingman.jpeg"
+    gif_name ="raw_data/2danceinsync.mov"
     # Load the gif
     gif = cv2.VideoCapture(gif_name)
     # Get the frame count
