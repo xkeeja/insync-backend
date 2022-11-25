@@ -18,7 +18,7 @@ def load_image(path : str):
     image = tf.compat.v1.image.decode_jpeg(image)
     image = tf.expand_dims(image, axis=0)
     # Resize and pad the image to keep the aspect ratio and fit the expected size.
-    image = tf.cast(tf.image.resize_with_pad(image, 256, 448), dtype=tf.int32)
+    image = tf.cast(tf.image.resize_with_pad(image, 160, 256), dtype=tf.int32)
     return image
 
 # Download the model from TF Hub.
@@ -27,13 +27,15 @@ def load_model(mode:str ='local'):
     load model from tensorflow hub and make it ready for porediction
     input : 'hub' or 'local'
     output : tensorflow model """
+
+    start=time.time()
     if mode == 'hub':
         model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
-        movenet = model.signatures['serving_default']
-        return movenet
+        model = model.signatures['serving_default']
     else:
         model = tf.saved_model.load("../model/saved_model.pb")
-        return model
+    print(Fore.BLUE + f"model loade in: {time.time()-start}s" + Style.RESET_ALL)
+    return model
 
 
 def load_video_and_release(path : str, output_format: str, output_name :str):
@@ -103,18 +105,20 @@ def drawing_joints(keypoints, number_people, frame):
             pass
         else:
             print("plotting ", person_id)
-            x_vals = keypoints[person_id,:,1]*256
-            y_vals = keypoints[person_id,:,0]*448
-            frame = cv2.drawMarker(
-                img=frame,
-                position = (int(x_vals),int(y_vals)),
-                color=(255,0,0),
-                markerType=cv2.MARKER_CROSS,
-                markerSize= 10,
-                thickness= 1,
-                line_type=8
-            )
-            print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
+            x_vals = keypoints[person_id,:,1]
+            y_vals = keypoints[person_id,:,0]
+            print (x_vals, type(x_vals))
+            for x,y in zip(x_vals, y_vals):
+                frame = cv2.drawMarker(
+                    img=frame,
+                    position = (int(x),int(y)),
+                    color=(255*(1-person_id),255*person_id,0),
+                    markerType=cv2.MARKER_CROSS,
+                    markerSize= 20,
+                    thickness= 3,
+                    line_type=8
+                )
+    print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
 
@@ -127,13 +131,13 @@ def predict_on_stream (vid, writer, model):
         if ret==True:
             image = frame.copy()
             #Preprocessing the image
-            input_image = preprocess_image(image, 256, 448)
+            input_image = preprocess_image(image, 256, 128)
             # making prediction
             keypoints = predict(model, input_image)
-            keypoints_normal_scale = np.squeeze(np.multiply(keypoints, [256,448,1]))
-            drawing_joints(keypoints_normal_scale, number_people=2)
+            keypoints_normal_scale = np.squeeze(np.multiply(keypoints, [1080,1920,1]))
+            print(keypoints_normal_scale)
             #frame = cv2.flip(frame,0)
-            frame = drawing_joints(keypoints, number_people=2, frame=frame)
+            frame = drawing_joints(keypoints_normal_scale, number_people=2, frame=frame)
 
             writer.write(frame)
         else:
