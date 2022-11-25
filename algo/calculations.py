@@ -4,7 +4,7 @@ import numpy as np
 from posevisual.person import Joint
 
 
-def calculate_angles( joint1, joint2):
+def calculate_angle( joint1, joint2):
     """takes two joint objects and returns the angle between them
     angle of 2 seen from 1 """
     x1, y1 = joint1.x  , joint1.y
@@ -33,7 +33,7 @@ def calculate_angles( joint1, joint2):
         grad = abs(delta_x/delta_y)
         return np.arctan(grad)*180/np.pi +90
     elif delta_x< 0 and delta_y< 0:
-        grad = abs((y1-y2)/(x2-x1))
+        grad = abs(delta_y/delta_x)
         return np.arctan(grad)*180/np.pi +180
     else:
         grad= abs(delta_x / delta_y)
@@ -59,7 +59,7 @@ def return_angles(keypoints, number_of_people):
             joint1.add_coord(keypoints[person, joint1.id,1] ,keypoints[person,joint1.id,0])
             joint2.add_coord(keypoints[person,joint2.id,1] ,keypoints[person,joint2.id,0])
 
-            angle =calculate_angles( joint1, joint2)
+            angle =calculate_angle( joint1, joint2)
             angle_with_joints= (angle, joint1, joint2)
             person_angles.append(angle)
             angles_with_joints.append(angle_with_joints)
@@ -74,7 +74,10 @@ def similarity_scorer(angles , number_of_people , strictness=1 ):
     link_scores_list =[]
     if number_of_people ==2:
         for link_angle in range(16):
-            link_score = abs(angles[1, link_angle]-angles[0,link_angle])**strictness
+            if link_angle <4:
+                continue
+
+            link_score = abs(angles[1][link_angle]-angles[0][link_angle])**strictness
             link_scores_dict[link_angle]= link_score
             link_scores_list.append(link_score)
 
