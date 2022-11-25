@@ -46,28 +46,37 @@ class Joint:
 
 x = Joint(1, 3)
 
+link_def= {
+    0 : ["right ear to right eye", (4,2),""],
+    1 : ["right eye to nose", (2,0), ""],
+    2 : ["nose to left eye", (0,1), ""],
+    3 : ["left eye to left ear", (1,3), ""],
+    4 : ["left shoulder to right shoulder", (5,6), "chest line"],
+    5 : ["right elbow to right shoulder ", (6,8), "right arm"],
+    6 : ["right elbow to right wrist", (8,10), "right forearm"],
+    7 : ["left shoulder to left elbow", (5,7), "left arm"],
+    8 : ["left elbow to left wrist", (7,9), "left forearm"],
+    9 : ["right shoulder to right hip", (6,12), "suspender right"],
+    10 : ["left shoulder to left hip", (5,11), "suspender left"],
+    11 : ["left hip to right hip", (11,12), "belt"],
+    12 : ["right hip to right knee", (12,14), "right thigh"],
+    13 : ["right knee to right foot", (14,16), "right calf"],
+    14 : ["left hip to left knee", (11,13), "left thigh"],
+    15 : ["left knee to left foot", (13,15), "left calf"]
+    }
+
+
+
+
+
+
 class Link:
 
     def __init__(self, id:int):
         self.id = id
         pass
 
-    link_def= {1 : ["right ear to right eye", (4,2), ""],
-                             "right eye to nose":(2,0),
-                             "nose to left eye":(0,1),
-                             "left eye to left ear":(1,3),
-                             "left shoulder to right shoulder":(5,6),
-                             "right elbow to right shoulder ":(6,8),
-                             "right elbow to right wrist" :(8,10),
-                             "right shoulder to right elbow":(5,7),
-                             "right elbow to right wrist":(7,9),
-                             "left shoulder to left hip":(6,12),
-                             "chest to right hip":(5,11),
-                             "left hip to right hip":(11,12),
-                             "left hip to left knee":(12,14),
-                             "left knee to left foot":(14,16),
-                             "right hip to right knee":(11,13),
-                             "right knee to right foot":(13,15)}
+
 
 
 class Person:

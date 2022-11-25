@@ -32,4 +32,6 @@ vid, writer, fps, \
                                                   output_format="mp4",
                                                   output_name="output_stream_3")
 vid, all_scores  = predict_on_stream(vid, writer, model)
+timeline = np.arange(frame_count)/fps #time in seconds
+
 print(all_scores)

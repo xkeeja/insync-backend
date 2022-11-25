@@ -52,8 +52,8 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
     frame_count = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"Video analysed: /n fps: {fps}, *\
-          /n frame count: {frame_count} , /n width : {width}, height : {height}")
+    print(f"Video analysed: \n fps: {fps}, *\
+          \n frame count: {frame_count} , \n width : {width}, \n height : {height}")
 
     # creation onf the writer to recompose the video later on
     if output_format =="avi":
@@ -155,7 +155,7 @@ def predict_on_stream (vid, writer, model):
             #print(keypoints)
             #Calculate scores
 
-            frame_score , max_link  = calculate_score(keypoints , 2)
+            frame_score , max_link  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
 
             print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
