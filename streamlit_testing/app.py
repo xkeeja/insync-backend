@@ -24,8 +24,8 @@ if uploaded_video:
         if st.button('Analyse synchronization'):
             
             with st.spinner('Processing...'):
-                url = "http://127.0.0.1:8000/vid_processed"
-                # url = "https://syncv4-eagwezifvq-an.a.run.app/vid_processed"
+                url = "http://127.0.0.1:8000/vid_process"
+                # url = "https://syncv4-eagwezifvq-an.a.run.app/vid_process"
                 params = {
                     "vid_name": post_response['vid_name'],
                     "output_name": post_response['output_name'],

@@ -12,7 +12,12 @@ from api.script.movenet_load import load_video_and_release, load_model, predict_
 
 app = FastAPI()
 app.state.model = load_model(mode='hub')
+
+
+# set up google cloud
 SYNC_BUCKET = 'sync_testinput'
+gcs = storage.Client()
+bucket = gcs.get_bucket(SYNC_BUCKET)
 
 
 app.add_middleware(
@@ -58,7 +63,7 @@ def stats_to_st(file: UploadFile = File(...)):
             }
     
 
-@app.get("/vid_processed")
+@app.get("/vid_process")
 def process_vid(vid_name, output_name, frame_count, fps):    
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
     
@@ -74,8 +79,6 @@ def process_vid(vid_name, output_name, frame_count, fps):
     
     
     # upload video to google cloud storage
-    gcs = storage.Client()
-    bucket = gcs.get_bucket(SYNC_BUCKET)
     blob = bucket.blob(output_lite)
     blob.upload_from_filename(output_lite)
     
