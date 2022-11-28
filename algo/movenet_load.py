@@ -7,7 +7,7 @@ from colorama import Fore, Style
 import time
 
 #Import calculation functions
-from algo.calculations import return_angles , similarity_scorer
+from algo.calculations import data_to_people, similarity_scorer
 
 
 # Load the input image.
@@ -136,10 +136,10 @@ def calculate_score(keypoints , number_of_people):
     Give a similariy score for the the frame.
     """
     start = time.time()
-    all_angles, all_angles_with_joints =  return_angles(keypoints , number_of_people)
-    link_scores_list , frame_score , max_link , max, link_scores_dict=similarity_scorer(all_angles , number_of_people , strictness=1 )
+    people =  data_to_people(keypoints , number_of_people)
+    link_mae, frame_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return frame_score , max_link
+    return people, link_mae, frame_score
 
 
 def predict_on_stream (vid, writer, model, width, height):
@@ -147,6 +147,8 @@ def predict_on_stream (vid, writer, model, width, height):
 
     """
     all_scores = []
+    all_people = []
+    all_link_mae = []
     count = 0
     while(vid.isOpened()):
         ret, frame = vid.read()
@@ -161,10 +163,14 @@ def predict_on_stream (vid, writer, model, width, height):
             #print(keypoints)
             #Calculate scores
 
-            frame_score , max_link  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
+            all_people.append(people)
+            all_link_mae.append(link_mae)
+            max_id = np.argmax(link_mae)
+            name_link_max = people[0].links[max_id].name
 
-            print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
+            print(f"FRAME_SCORE{frame_score}, MAX_LINK:({max_id} : {name_link_max})")
             #frame = cv2.flip(frame,0)
             frame = drawing_joints(keypoints, number_people=2, frame=frame)
             frame_resize = cv2.resize(
@@ -180,4 +186,4 @@ def predict_on_stream (vid, writer, model, width, height):
 
     writer.release()
 
-    return vid , all_scores
+    return vid , all_scores, all_people, all_link_mae
