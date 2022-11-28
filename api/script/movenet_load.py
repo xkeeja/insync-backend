@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from colorama import Fore, Style
 import time
+import os
+import glob
 
 #Import calculation functions
 from api.script.calculations import return_angles, similarity_scorer
@@ -32,13 +34,12 @@ def load_model(mode:str ='local'):
     input : 'hub' or 'local'
     output : tensorflow model """
 
-    start=time.time()
     if mode == 'hub':
         model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
         model = model.signatures['serving_default']
     else:
-        model = tf.saved_model.load("../model/saved_model.pb")
-    print(Fore.BLUE + f"model loads in: {time.time()-start}s" + Style.RESET_ALL)
+        current_dir = os.path.abspath('.')
+        model = tf.saved_model.load(f"{current_dir}/api/model/saved_model.pb")
     return model
 
 
@@ -61,7 +62,7 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
         cv2.VideoWriter_fourcc(*"MJPG"), fps,(width,height))
     elif output_format =="mp4":
         writer = cv2.VideoWriter(f"{output_name}.mp4",
-        cv2.VideoWriter_fourcc(*"mp4v"), fps,(width,height))
+        cv2.VideoWriter_fourcc(*"MP4V"), fps,(width,height))
 
     return vid, writer, fps, frame_count, width, height
 
@@ -126,6 +127,11 @@ def drawing_joints(keypoints, number_people , frame):
     return frame
 
 
+def add_text(frame, count: int):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    return cv2.putText(frame, f'{count}', (10,450), font, 3, (0, 255, 0), 2, cv2.LINE_AA)
+
+
 def calculate_score(keypoints , number_of_people):
     """
     Calculate the angles between joints given the keypoints.
@@ -142,7 +148,14 @@ def predict_on_stream (vid, writer, model):
     """
 
     """
+    count = 0
     all_scores = []
+    
+    # clean screencaps folder
+    files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*")
+    for f in files:
+        os.remove(f)
+    
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
@@ -161,16 +174,22 @@ def predict_on_stream (vid, writer, model):
             print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
             #frame = cv2.flip(frame,0)
             frame = drawing_joints(keypoints, number_people=2, frame=frame)
-            frame_rgb = cv2.resize(
+            frame_resize = cv2.resize(
                     frame,
                     (1920, 1080),
                     interpolation=cv2.INTER_LANCZOS4
             ) # OpenCV processes BGR images instead of RGB
-
-            writer.write(frame_rgb)
+            
+            frame_text = add_text(frame_resize, count)
+            
+            cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
+            count += 1
+            
+            writer.write(frame_text)
+            
         else:
             break
 
     writer.release()
 
-    return vid , all_scores
+    return vid, all_scores
