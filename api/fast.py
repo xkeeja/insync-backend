@@ -74,17 +74,28 @@ def process_vid(vid_name, output_name, frame_count, fps):
     my_uuid = uuid.uuid4()
     output_lite = f'output_lite_{my_uuid}.mp4'
     current_dir = os.path.abspath('.')
-    result = subprocess.run(f'ffmpeg -i {current_dir}/{output_name}.mp4 -b 800k {current_dir}/{output_lite} -y', shell=True)
+    result = subprocess.run(f'ffmpeg -i {current_dir}/{output_name}.mp4 -b:v 800k {current_dir}/{output_lite} -y', shell=True)
     print(result)
     
     
     # upload video to google cloud storage
-    blob = bucket.blob(output_lite)
-    blob.upload_from_filename(output_lite)
+    vid_blob = bucket.blob(output_lite)
+    vid_blob.upload_from_filename(output_lite)
+    
+    # clean screencaps in google cloud storage
+    blobs = bucket.list_blobs(prefix='screencaps')
+    for blob in blobs:
+        blob.delete()
+    
+    # upload screencaps to google cloud storage
+    for i in range(int(frame_count)):
+        blob = bucket.blob(f"screencaps/{my_uuid}/frame{i}.jpg")
+        blob.upload_from_filename(f"{os.path.abspath('.')}/api/screencaps/frame{i}.jpg")
     
     
     return {
-        'output_url': blob.public_url,
+        'output_url': vid_blob.public_url,
         'timestamps': list(timestamps),
-        'scores': all_scores
+        'scores': all_scores,
+        'my_uuid': my_uuid
     }
