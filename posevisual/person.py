@@ -97,6 +97,10 @@ class Link:
         self.similarity_score = similarity_score
         return self
 
+    def add_angle(self, angle: float):
+        self.angle = angle
+        return self
+
 
 
 class Person:
@@ -117,3 +121,6 @@ class Person:
             self.joints[link.joint2_id]
             ) for link in self.links_empty]
         return self
+
+    def angles(self):
+        return [link.angle for link in self.links]

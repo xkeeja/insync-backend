@@ -142,7 +142,7 @@ def calculate_score(keypoints , number_of_people):
     return frame_score , max_link
 
 
-def predict_on_stream (vid, writer, model):
+def predict_on_stream (vid, writer, model, width, height):
     """
 
     """
@@ -157,7 +157,7 @@ def predict_on_stream (vid, writer, model):
             input_image = preprocess_image(image, 256, 256)
             # making prediction
             keypoints = predict(model, input_image)
-            keypoints= np.squeeze(np.multiply(keypoints, [1080,1920,1]))
+            keypoints= np.squeeze(np.multiply(keypoints, [height,width,1]))
             #print(keypoints)
             #Calculate scores
 
@@ -169,7 +169,7 @@ def predict_on_stream (vid, writer, model):
             frame = drawing_joints(keypoints, number_people=2, frame=frame)
             frame_resize = cv2.resize(
                     frame,
-                    (1920, 1080),
+                    (width, height),
                     interpolation=cv2.INTER_LANCZOS4
             ) # OpenCV processes BGR images instead of RGB
             frame_text = add_text(frame_resize, count)
