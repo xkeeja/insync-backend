@@ -92,4 +92,4 @@ def similarity_scorer(people:list):
 
     frame_score = np.mean(link_mae)
 
-    return link_mae , frame_score
+    return np.array(link_mae) , frame_score
