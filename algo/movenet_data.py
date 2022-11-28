@@ -35,8 +35,9 @@ EDGE_COLORS = {
     (14, 16): cyan
 }
 
-model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
-movenet = model.signatures["serving_default"]
+model = tf.saved_model.load("local_model")
+movenet = model.signatures['serving_default']
+
 WIDTH = HEIGHT = 256
 
 def loop(frame, keypoints, threshold=0.11):
@@ -121,7 +122,7 @@ def load_gif():
     """
     Loads the gif and return its details
     """
-    gif_name ="raw_data/2danceinsync.mov"
+    gif_name ="raw_data/oyako.jpeg"
     # Load the gif
     gif = cv2.VideoCapture(gif_name)
     # Get the frame count

@@ -6,6 +6,7 @@ import matplotlib.image as mpimg
 from posevisual.person import Joint
 
 
+
 def calculate_angles( joint1, joint2):
     """takes two joint objects and returns the angle between them
     angle of 2 seen from 1 """
@@ -70,7 +71,7 @@ def return_angles(keypoints, number_of_people):
     return all_angles , all_angles_with_joints
 
 
-def similarity_scorer(angles , number_of_people , strictness=1 ):
+def similarity_scorer(angles , number_of_people , strictness=3 ):
     """returns difference if two people and variance if more than two people"""
     link_scores_dict ={}
     link_scores_list =[]
@@ -91,10 +92,10 @@ def similarity_scorer(angles , number_of_people , strictness=1 ):
     frame_score = (np.sum(link_scores_list)**(1/strictness))/17
     max = 0
     max_link = 0
-    for key, val in link_scores_dict.items():
-        if val > max:
-            max =val
-            max_link = key
+    # for key, val in link_scores_dict.items():
+    #     if val > max:
+    #         max =val
+    #         max_link = key
 
     return link_scores_list , frame_score , max_link , max, link_scores_dict
 
@@ -116,7 +117,7 @@ print(keypoints)
 
 #calculating angles
 start = time.time()
-angles ,all_angles_with_joints= np.array(return_angles(keypoints,6))
+angles ,all_angles_with_joints= np.array(return_angles(keypoints,2))
 end = time.time()
 print("time:" ,end-start)
 print(angles)
@@ -131,7 +132,7 @@ end= time.time()
 print("scoring time", end-start)
 
 print(link_scores)
-print(frame_score)
+print("FRAME SCORE ", frame_score)
 
 
 for x in all_angles_with_joints[0]:
@@ -172,8 +173,8 @@ sns.scatterplot(x=x_vals_2, y=y_vals_2, hue=features)
 sns.scatterplot(x=x_vals_3, y=y_vals_3, hue =features)
 
 sns.scatterplot(x=x_vals_4, y=y_vals_4, hue=features)
-sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
+# sns.scatterplot(x=x_vals_5, y=y_vals_5, hue =features)
 
-sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
+# sns.scatterplot(x=x_vals_6, y=y_vals_6, hue=features)
 
 plt.show()

@@ -30,7 +30,7 @@ class Joint:
     def __init__(self, id :int, person_id : int):
         self.person_id = person_id
         self.id = id
-        self.name = " ".join(joint_def[id][0:2])
+        self.name = " ".join([joint_def[id][1],joint_def[id][0]])
         self.color = joint_def[id][2]
 
     def add_coord(self, x : float, y : float):
@@ -52,7 +52,7 @@ class Link:
         self.id = id
         pass
 
-    link_def= {1 : ["right ear to right eye", (4,2), ""],
+    link_def= {1 : ["right ear to right eye", (4,2)],
                              "right eye to nose":(2,0),
                              "nose to left eye":(0,1),
                              "left eye to left ear":(1,3),

@@ -7,7 +7,7 @@ from colorama import Fore, Style
 import time
 
 #Import calculation functions
-from calculations import return_angles , similarity_scorer
+from algo.calculations import return_angles , similarity_scorer
 
 
 # Load the input image.
@@ -37,7 +37,7 @@ def load_model(mode:str ='local'):
         model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
         model = model.signatures['serving_default']
     else:
-        model = tf.saved_model.load("../model/saved_model.pb")
+        model = tf.saved_model.load("local_model")
     print(Fore.BLUE + f"model loads in: {time.time()-start}s" + Style.RESET_ALL)
     return model
 
@@ -50,6 +50,7 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
     vid = cv2.VideoCapture(path)
     fps = int(vid.get(cv2.CAP_PROP_FPS))
     frame_count = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration  = frame_count / fps
     width  = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
     print(f"Video analysed: /n fps: {fps}, *\
@@ -195,7 +196,7 @@ def predict_on_stream (vid, writer, model):
 
 
 
-vid, writer, fps, frame_count, width, height = load_video_and_release("1125.mp4" , "mp4", "test_output")
+vid, writer, fps, frame_count, width, height = load_video_and_release("raw_data/dancing.mp4" , "mp4", "test_output")
 model = load_model("hub")
 start = time.time()
 vid , all_scores = predict_on_stream(vid, writer, model)
@@ -204,15 +205,18 @@ end  = time.time()
 
 
 import matplotlib.pyplot as plt
+
+
 print(f"ALL SCORES: {all_scores} , MEAN SCORE:{np.mean(all_scores)}")
 
 
 
 max_frame = (all_scores.index(max(all_scores))+1)*8.25 /255
 
+time = np.arange(frame_count )/fps
 
 print("time for whole thing" , end-start)
 
 
-plt.plot(all_scores)
+plt.plot(time , all_scores)
 plt.show()

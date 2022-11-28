@@ -25,7 +25,7 @@ from algo.movenet_load import load_video_and_release, load_model, predict_on_str
 
 # writer.release()
 
-model = load_model(mode="hub")
+model = load_model()
 
 vid, writer, fps, \
     frame_count, width, height = load_video_and_release("Duet_clip_1_In_Sync.mp4",
