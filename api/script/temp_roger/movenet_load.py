@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from colorama import Fore, Style
 import time
+import os
+import glob
 
 #Import calculation functions
 from api.script.calculations import data_to_people, similarity_scorer
@@ -32,13 +34,12 @@ def load_model(mode:str ='local'):
     input : 'hub' or 'local'
     output : tensorflow model """
 
-    start=time.time()
     if mode == 'hub':
         model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
         model = model.signatures['serving_default']
     else:
-        model = tf.saved_model.load("../model/saved_model.pb")
-    print(Fore.BLUE + f"model loads in: {time.time()-start}s" + Style.RESET_ALL)
+        current_dir = os.path.abspath('.')
+        model = tf.saved_model.load(f"{current_dir}/api/model/saved_model.pb")
     return model
 
 
@@ -61,7 +62,7 @@ def load_video_and_release(path : str, output_format: str, output_name :str):
         cv2.VideoWriter_fourcc(*"MJPG"), fps,(width,height))
     elif output_format =="mp4":
         writer = cv2.VideoWriter(f"{output_name}.mp4",
-        cv2.VideoWriter_fourcc(*"mp4v"), fps,(width,height))
+        cv2.VideoWriter_fourcc(*"MP4V"), fps,(width,height))
 
     return vid, writer, fps, frame_count, width, height
 
@@ -150,6 +151,7 @@ def drawing_joints(keypoints, number_people , frame):
     print(Fore.BLUE + f"Plotting joints output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
+
 def drawing_links(people, link_mae, frame, linkwidth: int):
     """
     Plot the line of the links based on a treshold value for color
@@ -222,9 +224,9 @@ def calculate_score(keypoints , number_of_people):
     """
     start = time.time()
     people =  data_to_people(keypoints , number_of_people)
-    link_mae, frame_score, worst_link_name, worst_link_score = similarity_scorer(people)
+    link_mae, frame_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return people, link_mae, frame_score , worst_link_name , worst_link_score
+    return people, link_mae, frame_score
 
 
 def predict_on_stream (vid, writer, model, width, height):
@@ -234,13 +236,16 @@ def predict_on_stream (vid, writer, model, width, height):
     all_scores = []
     all_people = []
     all_link_mae = []
-    worst_link_scores =[]
-    worst_link_names =[]
     count = 0
+
+    # clean screencaps folder
+    files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*.jpg")
+    for f in files:
+        os.remove(f)
+
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
-            count+=1
             image = frame.copy()
             #Preprocessing the image
             input_image = preprocess_image(image, 256, 256)
@@ -250,14 +255,14 @@ def predict_on_stream (vid, writer, model, width, height):
             #print(keypoints)
             #Calculate scores
 
-            people, link_mae, frame_score ,worst_link_name , worst_link_score  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
-            worst_link_scores.append(worst_link_score)
-            worst_link_names.append(worst_link_name)
+            max_id = np.argmax(link_mae)
+            name_link_max = people[0].links[max_id].name
 
-            print(f"FRAME_SCORE{frame_score}, WORST LINK_NAME:{worst_link_name}, WORST LINK SCORE: {worst_link_score}")
+            print(f"FRAME_SCORE{frame_score}, MAX_LINK:({max_id} : {name_link_max})")
             #frame = cv2.flip(frame,0)
             image = drawing_links(people, link_mae, image, linkwidth=6)
             frame_mask = image.copy()
@@ -276,10 +281,14 @@ def predict_on_stream (vid, writer, model, width, height):
             ) # OpenCV processes BGR images instead of RGB
             frame_text = add_frame_text(frame_resize, count)
 
+            cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
+            count += 1
+
             writer.write(frame_text)
+
         else:
             break
 
     writer.release()
 
-    return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
+    return vid, all_scores, all_people, all_link_mae

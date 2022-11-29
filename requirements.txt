@@ -59,6 +59,7 @@ streamlit
 python-multipart
 plotly
 htbuilder
+streamlit_lottie
 
 #api
 fastapi
