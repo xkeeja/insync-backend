@@ -39,7 +39,6 @@ def stats_to_st(file: UploadFile = File(...)):
     # video file loading
     vid_name = file.filename
     uploaded_video = file.file
-    # dancers = data['dancers']
     output_name = 'output'
 
 

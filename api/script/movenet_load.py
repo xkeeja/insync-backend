@@ -239,6 +239,12 @@ def predict_on_stream (vid, writer, model, width, height, dancers):
     worst_link_scores =[]
     worst_link_names =[]
     count = 0
+    
+    # clean screencaps folder
+    files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*.jpg")
+    for f in files:
+        os.remove(f)
+    
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
