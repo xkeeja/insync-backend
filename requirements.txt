@@ -53,10 +53,12 @@ tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
 
 #encoding
 chardnet==5.0.0
+
 #streamlit
 streamlit
 python-multipart
-
+plotly
+htbuilder
 
 #api
 fastapi
