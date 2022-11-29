@@ -88,7 +88,7 @@ def processing(stats):
             "fps": stats['fps']
             }
         response = requests.get(url, params=params).json()
-        
+
         # #Retreive database
         # if get_file(source_blob='data.csv', save_as='data.csv'):
         #     df = pd.read_csv('data.csv')
@@ -110,10 +110,10 @@ def processing(stats):
         'Sync Error': response['scores']
     }
     df = pd.DataFrame(d)
-    
+
     #Calculate moving average for smoother graph
     df['Smoothed Sync Error'] = df['Sync Error'].rolling(window=9).mean()
-    
+
     #Plot moving average graph
     # df['MA'] = df['MA'] - 0.5
     st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -132,8 +132,8 @@ def processing(stats):
                 ),
             hovermode='x unified')
     st.plotly_chart(fig1)
-    
-    
+
+
     st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     st.write('The following graph shows your average synchronisation error, smoothed for easier reference of intervals needing improvement or attention.')
     # st.line_chart(data=df, x='Time', y='Smoothed Sync Error')
@@ -150,7 +150,7 @@ def processing(stats):
                 ),
             hovermode='x unified')
     st.plotly_chart(fig2)
-    
+
 
     #Load processed video
     video_url = response['output_url']
@@ -185,16 +185,16 @@ def processing(stats):
         #     if time_chosen:
         #         placeholder.empty()
         #         placeholder.video(video_url, start_time=math.floor(time_chosen[0]))
-        
+
         # radio method for displaying top 5 improvement areas
         # choice1 = f'Time: {timestamps[0]}s, Sync Error: {sync[0]}'
         # choice2 = f'Time: {timestamps[1]}s, Sync Error: {sync[1]}'
         # choice3 = f'Time: {timestamps[2]}s, Sync Error: {sync[2]}'
         # choice4 = f'Time: {timestamps[3]}s, Sync Error: {sync[3]}'
         # choice5 = f'Time: {timestamps[4]}s, Sync Error: {sync[4]}'
-        
+
         # radio = st.radio('**Select a timestamp**', (choice1, choice2, choice3, choice4, choice5,))
-        
+
         # if radio == choice1:
         #     st.video(video_url, start_time=math.floor(timestamps[0]))
         # elif radio == choice2:
@@ -205,13 +205,13 @@ def processing(stats):
         #     st.video(video_url, start_time=math.floor(timestamps[3]))
         # else:
         #     st.video(video_url, start_time=math.floor(timestamps[4]))
-        
+
         for i in range(len(index)):
             st.write(f"**Frame {index[i]}**")
             st.write(f'Timestamp: {timestamps[i]}s, Absolute Sync Error: {sync[i]}')
             st.image(f"https://storage.googleapis.com/sync_testinput/screencaps/{response['my_uuid']}/frame{top5imp[i]}.jpg")
             st.write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            
+
     with st.expander("**Model info:**"):
     # df = pd.DataFrame(
     #     np.random.randn(50, 20),
@@ -257,7 +257,7 @@ def main():
             if st.button("Start"):
                 show_vid.empty()
                 process_vid = True
-        
+
         if process_vid:
             processing(stats)
 
