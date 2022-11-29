@@ -87,7 +87,8 @@ def processing(stats):
             "frame_count": stats['frame_count'],
             "fps": stats['fps'],
             "width": stats['width'],
-            "height": stats['height']
+            "height": stats['height'],
+            "dancers": stats['dancers']
             }
         response = requests.get(url, params=params).json()
 
@@ -248,19 +249,24 @@ def main():
             show_vid = st.video(uploaded_video)
 
         process_vid = False
-        a, b, c, _, d = st.columns(5)
+        a, b, c = st.columns(3)
         with a:
             display_dial("FPS", f"{stats['fps']}", "#1C83E1")
         with b:
             display_dial("FRAMES", f"{stats['frame_count']}", "#1C83E1")
         with c:
             display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
-        with d:
+
+        _, a, _, b, _ = st.columns([1, 2, 1, 1, 1])
+        with a:
+            dancers = st.number_input("Enter number of dancers:", min_value=1, max_value=6)
+        with b:
             if st.button("Start"):
                 show_vid.empty()
                 process_vid = True
 
         if process_vid:
+            stats['dancers'] = dancers
             processing(stats)
 
 if __name__ == '__main__':

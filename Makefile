@@ -67,3 +67,6 @@ run_api:
 
 run_streamlit_test:
 	streamlit run streamlit_testing/app.py
+
+clean_screencaps:
+	python tools/clean_screencaps.py
