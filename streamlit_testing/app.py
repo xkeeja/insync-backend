@@ -81,7 +81,7 @@ def processing(stats):
     st.write('The following graph shows your absolute synchronisation error, calculated as a difference in pose/angle of major joints relative to each other. A lower value is a smaller difference, and therefore better synchronization. Peaks are areas of lowest synchronisation.')
     # st.line_chart(data=df, x='Time', y='Sync Error')
     fig1 = go.Figure()
-    fig1.add_trace(go.Scatter(x=df.index, y=list(df['Sync Error'])))
+    fig1.add_trace(go.Scatter(x=df.index, y=list(df['Sync Error']), line=dict(color='#ff008c')))
     fig1.update_layout(
             title="Absolute Sync Error Graph",
             xaxis_title="Frame",
@@ -99,7 +99,7 @@ def processing(stats):
     st.write('The following graph shows your average synchronisation error, smoothed for easier reference of intervals needing improvement or attention.')
     # st.line_chart(data=df, x='Time', y='Smoothed Sync Error')
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=df.index, y=list(df['Smoothed Sync Error'])))
+    fig2.add_trace(go.Scatter(x=df.index, y=list(df['Smoothed Sync Error']), line=dict(color='#ff008c')))
     fig2.update_layout(
             title="Smoothed Sync Error Graph",
             xaxis_title="Frame",
@@ -116,9 +116,7 @@ def processing(stats):
     #Load processed video
     video_url = response['output_url']
     st.video(video_url)
-    # video_file = open('video.mp4', 'rb')
-    # video_bytes = video_file.read()
-    # st.video(video_bytes)
+    
 
     #Timestamp buttons
     sorted_df = df.sort_values(by=['Smoothed Sync Error'], ascending=False).round(2).head(5)
@@ -142,7 +140,8 @@ def main():
     with col1:
         st_lottie(lottie_dancing, key="dance_left")
     with col2:
-        st.markdown("<h1 style='text-align: center; color: yellow;'>Dance Synchronisation</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: RebeccaPurple;'>In Sync</h1>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center; color: #ff008c;'>Dance Synchronisation<br/>Evaluation Tool</h3>", unsafe_allow_html=True)
     with col3:
         st_lottie(lottie_dancing, key="dance_right")
 
@@ -174,6 +173,8 @@ def main():
         # with c:
         #     display_dial("DIMENSION", f"{stats['dim']}", "#1C83E1")
 
+        process_vid = False
+
         _, a, _, b, _ = st.columns([1, 2, 1, 1, 1])
         with a:
             dancers = st.number_input("Enter number of dancers:", min_value=1, max_value=6)
@@ -182,7 +183,6 @@ def main():
                 show_vid.empty()
                 process_vid = True
 
-        process_vid = False
         if process_vid:
             stats['dancers'] = dancers
             processing(stats)
