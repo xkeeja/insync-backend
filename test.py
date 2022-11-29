@@ -31,7 +31,9 @@ vid, writer, fps, \
     frame_count, width, height = load_video_and_release("1125.mp4",
                                                   output_format="mp4",
                                                   output_name="output_stream_3")
-vid , all_scores, all_people, all_link_mae = predict_on_stream(vid, writer, model, width, height)
+vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names = predict_on_stream(vid, writer, model, width, height)
 timeline = np.arange(frame_count)/fps #time in seconds
 
 print(all_scores)
+print(worst_link_scores)
+print(worst_link_names)

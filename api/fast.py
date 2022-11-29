@@ -40,59 +40,61 @@ def stats_to_st(file: UploadFile = File(...)):
     vid_name = file.filename
     uploaded_video = file.file
     output_name = 'output'
-    
-    
+
+
     # open video file
     with open(vid_name, mode='wb') as f:
         f.write(uploaded_video.read())
-    
-    
+
+
     cap = cv2.VideoCapture(vid_name)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    
-    
+
+
     return {
         'frame_count': frame_count,
         'fps': fps,
         'dim': f'{width} x {height}',
+        'width': width,
+        'height': height,
         'vid_name': vid_name,
         'output_name': output_name
             }
-    
+
 
 @app.get("/vid_process")
-def process_vid(vid_name, output_name, frame_count, fps):    
+def process_vid(vid_name, output_name, frame_count, fps, width, height):
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
-    
-    vid, all_scores = predict_on_stream(vid, writer, app.state.model)
+
+    vid, all_scores, _, _ = predict_on_stream(vid, writer, app.state.model, int(width), int(height))
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
-    
+
     # compress video output to smaller size
     my_uuid = uuid.uuid4()
     output_lite = f'output_lite_{my_uuid}.mp4'
     current_dir = os.path.abspath('.')
     result = subprocess.run(f'ffmpeg -i {current_dir}/{output_name}.mp4 -b:v 800k {current_dir}/{output_lite} -y', shell=True)
     print(result)
-    
-    
+
+
     # upload video to google cloud storage
     vid_blob = bucket.blob(output_lite)
     vid_blob.upload_from_filename(output_lite)
-    
+
     # clean screencaps in google cloud storage
     blobs = bucket.list_blobs(prefix='screencaps')
     for blob in blobs:
         blob.delete()
-    
+
     # upload screencaps to google cloud storage
     for i in range(int(frame_count)):
         blob = bucket.blob(f"screencaps/{my_uuid}/frame{i}.jpg")
         blob.upload_from_filename(f"{os.path.abspath('.')}/api/screencaps/frame{i}.jpg")
-    
-    
+
+
     return {
         'output_url': vid_blob.public_url,
         'timestamps': list(timestamps),

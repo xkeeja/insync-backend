@@ -9,7 +9,7 @@ import os
 import glob
 
 #Import calculation functions
-from api.script.calculations import return_angles, similarity_scorer
+from api.script.calculations import data_to_people, similarity_scorer
 
 
 # Load the input image.
@@ -112,24 +112,109 @@ def drawing_joints(keypoints, number_people , frame):
             print("plotting ", person_id)
             x_vals = keypoints[person_id,:,1]
             y_vals = keypoints[person_id,:,0]
-            print (x_vals, type(x_vals))
+            #print (x_vals, type(x_vals))
             for x,y in zip(x_vals, y_vals):
-                frame = cv2.drawMarker(
-                    img=frame,
-                    position = (int(x),int(y)),
-                    color=(255*(1-person_id),255*person_id,0),
-                    markerType=cv2.MARKER_CROSS,
-                    markerSize= 20,
-                    thickness= 3,
-                    line_type=8
+                cv2.circle(
+                img=frame,
+                center=(int(x), int(y)),
+                radius=7,
+                color=(255,255,255),
+                thickness=-1,
+                lineType=cv2.LINE_AA
                 )
-    print(Fore.BLUE + f"Plotting output made in: {time.time()-start}s" + Style.RESET_ALL)
+                cv2.circle(
+                img=frame,
+                center=(int(x), int(y)),
+                radius=5,
+                color=(120,10,120),
+                thickness=-1,
+                lineType=cv2.LINE_AA
+                )
+                # frame = cv2.drawMarker(
+                #     img=frame,
+                #     position = (int(x),int(y)),
+                #     color=(255,255,255),
+                #     markerType=cv2.MARKER_CROSS,
+                #     markerSize= 23,
+                #     thickness= 3,
+                #     line_type=8
+                # )
+                # frame = cv2.drawMarker(
+                #     img=frame,
+                #     position = (int(x),int(y)),
+                #     color=(120,10,120),
+                #     markerType=cv2.MARKER_CROSS,
+                #     markerSize= 20,
+                #     thickness= 3,
+                #     line_type=8
+                # )
+    print(Fore.BLUE + f"Plotting joints output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
 
-def add_text(frame, count: int):
+def drawing_links(people, link_mae, frame, linkwidth: int):
+    """
+    Plot the line of the links based on a treshold value for color
+    """
+    start=time.time()
+    for person in people:
+        for link in person.links:
+            mae = link_mae[link.id]
+            if mae>=30:
+                link.set_color((28,25,215))# red in BGR channel (opencv swap the channels)
+            elif mae>=20:
+                link.set_color((97,174,253))
+            elif mae>=10:
+                link.set_color((191,255,255))
+            elif mae>=5:
+                link.set_color((106,217,166))
+
+            else:
+                link.set_color((65,150,26))
+
+            x1 , y1 = int(link.joints[0].x), int(link.joints[0].y)
+            x2 , y2 = int(link.joints[1].x), int(link.joints[1].y)
+            X_mean = int((x1+x2)/2)
+            Y_mean = int((y1+y2)/2)
+            length = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+            angle = link.angle
+            polygon = cv2.ellipse2Poly(
+                center=(X_mean,Y_mean),
+                axes=(int(length/2),linkwidth),
+                angle= int(angle),
+                arcStart=0,
+                arcEnd=360,
+                delta=1
+            )
+            cv2.fillConvexPoly(
+                img=frame,
+                points=polygon,
+                color=link.color,
+                lineType=cv2.LINE_AA
+            )
+
+            # frame = cv2.line(img=frame,
+            #                 pt1=(x1, y1),
+            #                 pt2=(x2, y2),
+            #                 color=link.color,
+            #                 thickness=5,
+            #                 lineType=cv2.LINE_AA
+            # )
+    print(Fore.BLUE + f"Plotting link output made in: {time.time()-start}s" + Style.RESET_ALL)
+    return frame
+
+
+def add_frame_text(frame, count: int):
     font = cv2.FONT_HERSHEY_SIMPLEX
-    return cv2.putText(frame, f'{count}', (10,450), font, 3, (0, 255, 0), 2, cv2.LINE_AA)
+    return cv2.putText(img=frame,
+                       text=f'{count}',
+                       org=(10,50),
+                       fontFace=font,
+                       fontScale=2,
+                       color=(0, 255, 0),
+                       thickness=2,
+                       lineType=cv2.LINE_AA,
+                       bottomLeftOrigin=False)
 
 
 def calculate_score(keypoints , number_of_people):
@@ -138,24 +223,26 @@ def calculate_score(keypoints , number_of_people):
     Give a similariy score for the the frame.
     """
     start = time.time()
-    all_angles, all_angles_with_joints =  return_angles(keypoints , number_of_people)
-    link_scores_list , frame_score , max_link , max, link_scores_dict=similarity_scorer(all_angles , number_of_people , strictness=1 )
+    people =  data_to_people(keypoints , number_of_people)
+    link_mae, frame_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return frame_score , max_link
+    return people, link_mae, frame_score
 
 
-def predict_on_stream (vid, writer, model):
+def predict_on_stream (vid, writer, model, width, height):
     """
 
     """
-    count = 0
     all_scores = []
-    
+    all_people = []
+    all_link_mae = []
+    count = 0
+
     # clean screencaps folder
-    files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*")
+    files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*.jpg")
     for f in files:
         os.remove(f)
-    
+
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
@@ -164,32 +251,44 @@ def predict_on_stream (vid, writer, model):
             input_image = preprocess_image(image, 256, 256)
             # making prediction
             keypoints = predict(model, input_image)
-            keypoints= np.squeeze(np.multiply(keypoints, [1080,1920,1]))
+            keypoints= np.squeeze(np.multiply(keypoints, [height,width,1]))
             #print(keypoints)
             #Calculate scores
 
-            frame_score , max_link  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
+            all_people.append(people)
+            all_link_mae.append(link_mae)
+            max_id = np.argmax(link_mae)
+            name_link_max = people[0].links[max_id].name
 
-            print(f"FRAME_SCORE{frame_score}, MAX_LINK:{max_link}")
+            print(f"FRAME_SCORE{frame_score}, MAX_LINK:({max_id} : {name_link_max})")
             #frame = cv2.flip(frame,0)
-            frame = drawing_joints(keypoints, number_people=2, frame=frame)
+            image = drawing_links(people, link_mae, image, linkwidth=6)
+            frame_mask = image.copy()
+            frame_mask = drawing_joints(keypoints, number_people=2, frame=frame_mask)
+
+            frame_superposition = cv2.addWeighted(src1=frame,
+                                                  alpha=0.35,
+                                                  src2=frame_mask,
+                                                  beta=0.65,
+                                                  gamma=0)
+
             frame_resize = cv2.resize(
-                    frame,
-                    (1920, 1080),
+                    frame_superposition,
+                    (width, height),
                     interpolation=cv2.INTER_LANCZOS4
             ) # OpenCV processes BGR images instead of RGB
-            
-            frame_text = add_text(frame_resize, count)
-            
+            frame_text = add_frame_text(frame_resize, count)
+
             cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
             count += 1
-            
+
             writer.write(frame_text)
-            
+
         else:
             break
 
     writer.release()
 
-    return vid, all_scores
+    return vid, all_scores, all_people, all_link_mae
