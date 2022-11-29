@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import storage
 import subprocess
@@ -39,6 +39,7 @@ def stats_to_st(file: UploadFile = File(...)):
     # video file loading
     vid_name = file.filename
     uploaded_video = file.file
+    # dancers = data['dancers']
     output_name = 'output'
 
 
@@ -66,10 +67,10 @@ def stats_to_st(file: UploadFile = File(...)):
 
 
 @app.get("/vid_process")
-def process_vid(vid_name, output_name, frame_count, fps, width, height):
+def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers):
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
 
-    vid, all_scores, _, _ = predict_on_stream(vid, writer, app.state.model, int(width), int(height))
+    vid, all_scores, _, _ = predict_on_stream(vid, writer, app.state.model, int(width), int(height), int(dancers))
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
 
     # compress video output to smaller size

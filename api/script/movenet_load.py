@@ -229,7 +229,7 @@ def calculate_score(keypoints , number_of_people):
     return people, link_mae, frame_score
 
 
-def predict_on_stream (vid, writer, model, width, height):
+def predict_on_stream (vid, writer, model, width, height, dancers):
     """
 
     """
@@ -255,7 +255,7 @@ def predict_on_stream (vid, writer, model, width, height):
             #print(keypoints)
             #Calculate scores
 
-            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=dancers)
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
@@ -266,7 +266,7 @@ def predict_on_stream (vid, writer, model, width, height):
             #frame = cv2.flip(frame,0)
             image = drawing_links(people, link_mae, image, linkwidth=6)
             frame_mask = image.copy()
-            frame_mask = drawing_joints(keypoints, number_people=2, frame=frame_mask)
+            frame_mask = drawing_joints(keypoints, number_people=dancers, frame=frame_mask)
 
             frame_superposition = cv2.addWeighted(src1=frame,
                                                   alpha=0.35,
