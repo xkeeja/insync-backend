@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from algo.movenet_load import load_video_and_release, load_model, predict_on_stream
+from api.script.movenet_load import load_video_and_release, load_model, predict_on_stream
 
 # cap = cv2.VideoCapture("Duet_clip_1_In_Sync.mp4")
 # fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -28,7 +28,7 @@ from algo.movenet_load import load_video_and_release, load_model, predict_on_str
 model = load_model(mode="hub")
 
 vid, writer, fps, \
-    frame_count, width, height = load_video_and_release("1125.mp4",
+    frame_count, width, height = load_video_and_release("dancingvid.mp4",
                                                   output_format="mp4",
                                                   output_name="output_stream_3")
 vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names = predict_on_stream(vid, writer, model, width, height)
