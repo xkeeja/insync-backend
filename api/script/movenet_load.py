@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from colorama import Fore, Style
 import time
+import os
+import glob
 
 #Import calculation functions
 from api.script.calculations import data_to_people, similarity_scorer
@@ -240,7 +242,6 @@ def predict_on_stream (vid, writer, model, width, height):
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
-            count+=1
             image = frame.copy()
             #Preprocessing the image
             input_image = preprocess_image(image, 256, 256)
@@ -275,6 +276,9 @@ def predict_on_stream (vid, writer, model, width, height):
                     interpolation=cv2.INTER_LANCZOS4
             ) # OpenCV processes BGR images instead of RGB
             frame_text = add_frame_text(frame_resize, count)
+
+            cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
+            count += 1
 
             writer.write(frame_text)
         else:
