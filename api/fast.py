@@ -69,7 +69,7 @@ def stats_to_st(file: UploadFile = File(...)):
 def process_vid(vid_name, output_name, frame_count, fps, width, height):
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
 
-    vid, all_scores, _, _ = predict_on_stream(vid, writer, app.state.model, int(width), int(height))
+    vid, all_scores, _, _, _, _ = predict_on_stream(vid, writer, app.state.model, int(width), int(height))
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
 
     # compress video output to smaller size
