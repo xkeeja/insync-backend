@@ -7,8 +7,10 @@ from posevisual.person import Joint, Link , Person , link_def
 
 
 def calculate_angle( joint1:Joint, joint2:Joint):
-    """takes two joint objects and returns the angle of 2 seen from 1
-    y in opposite direction to convention"""
+    """
+    Takes two joint objects and returns the angle of 2 seen from 1
+    y in opposite direction to conventional
+    """
     x1, y1 = joint1.x  , joint1.y
     x2, y2 = joint2.x , joint2.y
     #confidence1, confidence2= joint1_id[2], joint2_id[2]
@@ -42,8 +44,12 @@ def calculate_angle( joint1:Joint, joint2:Joint):
         return np.arctan(grad)*180/np.pi +270
 
 
+
+
+
 def data_to_people(keypoints: list, number_of_people:int):
-    """List of people objects with coordinates, confidence and angles assigned to joints and links.
+    """
+    Returns list of people objects with coordinates, confidence and angles assigned to joints and links.
     """
     #Create list of person objects
     people = []
@@ -75,10 +81,12 @@ def similarity_scorer(people:list):
     """
     number_of_people = len(people)
     number_of_links = range(len(people[0].links))
+
     if number_of_people ==2:
         link_mae =[]
         for link_id in number_of_links:
             link_mae.append(abs(people[0].angles()[link_id]- people[1].angles()[link_id]))
+
     else:
         #Each row: person column: link_id
         angle_list = [people[x].angles() for x in range(number_of_people)]
@@ -90,6 +98,9 @@ def similarity_scorer(people:list):
         #Calculate mean absolute error
         link_mae = np.mean(errors, axis =0)
 
+    #Other frame metrics
     frame_score = np.mean(link_mae)
+    worst_link_score = max(link_mae)
+    worst_link_name = link_def[np.argmax(link_mae)][0]
 
-    return np.array(link_mae) , frame_score
+    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score

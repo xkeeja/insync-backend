@@ -222,9 +222,9 @@ def calculate_score(keypoints , number_of_people):
     """
     start = time.time()
     people =  data_to_people(keypoints , number_of_people)
-    link_mae, frame_score = similarity_scorer(people)
+    link_mae, frame_score, worst_link_name, worst_link_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return people, link_mae, frame_score
+    return people, link_mae, frame_score , worst_link_name , worst_link_score
 
 
 def predict_on_stream (vid, writer, model, width, height):
@@ -234,6 +234,8 @@ def predict_on_stream (vid, writer, model, width, height):
     all_scores = []
     all_people = []
     all_link_mae = []
+    worst_link_scores =[]
+    worst_link_names =[]
     count = 0
     while(vid.isOpened()):
         ret, frame = vid.read()
@@ -248,14 +250,14 @@ def predict_on_stream (vid, writer, model, width, height):
             #print(keypoints)
             #Calculate scores
 
-            people, link_mae, frame_score  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score ,worst_link_name , worst_link_score  = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
-            max_id = np.argmax(link_mae)
-            name_link_max = people[0].links[max_id].name
+            worst_link_scores.append(worst_link_score)
+            worst_link_names.append(worst_link_name)
 
-            print(f"FRAME_SCORE{frame_score}, MAX_LINK:({max_id} : {name_link_max})")
+            print(f"FRAME_SCORE{frame_score}, WORST LINK_NAME:{worst_link_name}, WORST LINK SCORE: {worst_link_score}")
             #frame = cv2.flip(frame,0)
             image = drawing_links(people, link_mae, image, linkwidth=6)
             frame_mask = image.copy()
@@ -280,4 +282,4 @@ def predict_on_stream (vid, writer, model, width, height):
 
     writer.release()
 
-    return vid , all_scores, all_people, all_link_mae
+    return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
