@@ -100,7 +100,7 @@ def predict(model, input_image):
     print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
     return keypoints
 
-def drawing_joints(keypoints, number_people , frame):
+def drawing_joints(keypoints, number_people , frame, confidence_display=True):
     """
     Plot the positions of the joints on a frame.
     """
@@ -113,12 +113,13 @@ def drawing_joints(keypoints, number_people , frame):
             print("plotting ", person_id)
             x_vals = keypoints[person_id,:,1]
             y_vals = keypoints[person_id,:,0]
+            conf_vals = np.round(keypoints[person_id,:,2],4)
             #print (x_vals, type(x_vals))
-            for x,y in zip(x_vals, y_vals):
+            for i, (x,y,conf) in enumerate(zip(x_vals, y_vals, conf_vals)):
                 cv2.circle(
                 img=frame,
                 center=(int(x), int(y)),
-                radius=7,
+                radius=14,
                 color=(255,255,255),
                 thickness=-1,
                 lineType=cv2.LINE_AA
@@ -126,11 +127,39 @@ def drawing_joints(keypoints, number_people , frame):
                 cv2.circle(
                 img=frame,
                 center=(int(x), int(y)),
-                radius=5,
+                radius=12,
                 color=(120,10,120),
                 thickness=-1,
                 lineType=cv2.LINE_AA
                 )
+                if confidence_display:
+                    X_top_box = int(x)-7
+                    Y_top_box = int(y)-15
+                    X_bottom_box = int(x)+65
+                    Y_bottom_box = int(y)+4
+
+
+                    #background rectangle for the confidence score display per joint
+                    cv2.rectangle(
+                        img=frame,
+                        pt1=(X_top_box,Y_top_box), # top left corner
+                        pt2=(X_bottom_box,Y_bottom_box),#bottom right corner
+                        color=(255,255,255),
+                        thickness=-1,
+                        lineType=cv2.LINE_AA
+                    )
+                    #confidence score display per joint
+                    cv2.putText(
+                        img=frame,
+                        text=f'{conf}',
+                        org=(int(x)-5,int(y)),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=0.5,
+                        color=(0, 0, 0),
+                        thickness=1,
+                        lineType=cv2.LINE_AA,
+                        bottomLeftOrigin=False
+                    )
                 # frame = cv2.drawMarker(
                 #     img=frame,
                 #     position = (int(x),int(y)),
@@ -269,6 +298,7 @@ def predict_on_stream (vid, writer, model, width, height, dancers):
                                                   src2=frame_mask,
                                                   beta=0.65,
                                                   gamma=0)
+
 
             frame_resize = cv2.resize(
                     frame_superposition,
