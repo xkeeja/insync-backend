@@ -10,7 +10,7 @@ wheel>=0.29
 # data science
 numpy
 pandas
-scikit-learn
+#scikit-learn
 
 # tests/linter
 black
@@ -35,16 +35,22 @@ termcolor
 #  IN_SYNC SPECIFIC BASE
 #############################################
 
-#Visualisation
-matplotlib==3.6.2
+#COmmand In Line visualisation
 colorama
 
-#Video stream management
+# API
+## Video stream management
 opencv-python==4.6.0.66
+## API management
+fastapi
+uvicorn
+## Allow video gfile manipulayion to send through API (need on API sise and front-end)
+python-multipart
+
 
 #Deep Learning
 
-tensorflow-hub==0.12.0
+tensorflow-hub
 # Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
 tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
 tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
@@ -56,11 +62,6 @@ chardnet==5.0.0
 
 #streamlit
 streamlit
-python-multipart
 plotly
 htbuilder
 streamlit_lottie
-
-#api
-fastapi
-uvicorn
