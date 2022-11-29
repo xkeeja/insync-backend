@@ -118,7 +118,7 @@ def drawing_joints(keypoints, number_people , frame):
                 cv2.circle(
                 img=frame,
                 center=(int(x), int(y)),
-                radius=7,
+                radius=14,
                 color=(255,255,255),
                 thickness=-1,
                 lineType=cv2.LINE_AA
@@ -126,7 +126,7 @@ def drawing_joints(keypoints, number_people , frame):
                 cv2.circle(
                 img=frame,
                 center=(int(x), int(y)),
-                radius=5,
+                radius=12,
                 color=(120,10,120),
                 thickness=-1,
                 lineType=cv2.LINE_AA
