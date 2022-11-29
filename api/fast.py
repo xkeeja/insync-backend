@@ -90,9 +90,9 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers)
     #     blob.delete()
 
     # upload screencaps to google cloud storage
-    # for i in range(int(frame_count)):
-    #     blob = bucket.blob(f"screencaps/{my_uuid}/frame{i}.jpg")
-    #     blob.upload_from_filename(f"{os.path.abspath('.')}/api/screencaps/frame{i}.jpg")
+    for i in range(int(frame_count)):
+        blob = bucket.blob(f"screencaps/{my_uuid}/frame{i}.jpg")
+        blob.upload_from_filename(f"{os.path.abspath('.')}/api/screencaps/frame{i}.jpg")
 
 
     return {
