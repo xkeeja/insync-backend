@@ -76,7 +76,6 @@ def preprocess_image(image, new_width, new_height):
     - (720p: 854px by 480px)
     - (1080p: 854px by 480px)
     """
-    resize_table = {480}
     start = time.time()
     image = cv2.resize(image, (new_width, new_height))
     # Resize to the target shape and cast to an int32 vector
@@ -100,84 +99,143 @@ def predict(model, input_image):
     print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
     return keypoints
 
-def drawing_joints(keypoints, number_people , frame, confidence_display=True):
+def drawing_joints(keypoints, people , frame, confidence_display=True):
     """
     Plot the positions of the joints on a frame.
     """
+    number_people = len(people) # number of people selected by the user
+    no_display = people[0].joints_to_not_be_displayed()
     start=time.time()
     for person_id in range(number_people):
         print(np.mean(keypoints[person_id,:,2]))
         if np.mean(keypoints[person_id,:,2]) < 0.1:
             pass
         else:
-            print("plotting ", person_id)
-            x_vals = keypoints[person_id,:,1]
-            y_vals = keypoints[person_id,:,0]
-            conf_vals = np.round(keypoints[person_id,:,2],4)
-            #print (x_vals, type(x_vals))
-            for i, (x,y,conf) in enumerate(zip(x_vals, y_vals, conf_vals)):
-                cv2.circle(
-                img=frame,
-                center=(int(x), int(y)),
-                radius=14,
-                color=(255,255,255),
-                thickness=-1,
-                lineType=cv2.LINE_AA
-                )
-                cv2.circle(
-                img=frame,
-                center=(int(x), int(y)),
-                radius=12,
-                color=(120,10,120),
-                thickness=-1,
-                lineType=cv2.LINE_AA
-                )
-                if confidence_display:
-                    X_top_box = int(x)-7
-                    Y_top_box = int(y)-15
-                    X_bottom_box = int(x)+65
-                    Y_bottom_box = int(y)+4
-
-
-                    #background rectangle for the confidence score display per joint
-                    cv2.rectangle(
+            for person in people:
+                print("plotting ", person.id)
+                for joint, display_off in zip(person.joints, no_display):
+                    if display_off:
+                        pass
+                    else:
+                        x = joint.x
+                        y = joint.y
+                        conf = round(joint.confidence,4)
+                        cv2.circle(
                         img=frame,
-                        pt1=(X_top_box,Y_top_box), # top left corner
-                        pt2=(X_bottom_box,Y_bottom_box),#bottom right corner
+                        center=(int(x), int(y)),
+                        radius=14,
                         color=(255,255,255),
                         thickness=-1,
                         lineType=cv2.LINE_AA
-                    )
-                    #confidence score display per joint
-                    cv2.putText(
+                        )
+                        cv2.circle(
                         img=frame,
-                        text=f'{conf}',
-                        org=(int(x)-5,int(y)),
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                        fontScale=0.5,
-                        color=(0, 0, 0),
-                        thickness=1,
-                        lineType=cv2.LINE_AA,
-                        bottomLeftOrigin=False
+                        center=(int(x), int(y)),
+                        radius=12,
+                        color=(120,10,120),
+                        thickness=-1,
+                        lineType=cv2.LINE_AA
+                        )
+                        if confidence_display:
+                            X_top_box = int(x)-7
+                            Y_top_box = int(y)-15
+                            X_bottom_box = int(x)+65
+                            Y_bottom_box = int(y)+4
+
+
+                            #background rectangle for the confidence score display per joint
+                            cv2.rectangle(
+                                img=frame,
+                                pt1=(X_top_box,Y_top_box), # top left corner
+                                pt2=(X_bottom_box,Y_bottom_box),#bottom right corner
+                                color=(255,255,255),
+                                thickness=-1,
+                                lineType=cv2.LINE_AA
+                            )
+                            #confidence score display per joint
+                            cv2.putText(
+                                img=frame,
+                                text=f'{conf}',
+                                org=(int(x)-5,int(y)),
+                                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                                fontScale=0.5,
+                                color=(0, 0, 0),
+                                thickness=1,
+                                lineType=cv2.LINE_AA,
+                                bottomLeftOrigin=False
+                            )
+                #########################################################
+                '''
+                print("plotting ", person.id)
+                x_vals = keypoints[person_id,:,1]
+                y_vals = keypoints[person_id,:,0]
+                conf_vals = np.round(keypoints[person_id,:,2],4)
+                #print (x_vals, type(x_vals))
+                for i, (x,y,conf) in enumerate(zip(x_vals, y_vals, conf_vals)):
+                    cv2.circle(
+                    img=frame,
+                    center=(int(x), int(y)),
+                    radius=14,
+                    color=(255,255,255),
+                    thickness=-1,
+                    lineType=cv2.LINE_AA
                     )
-                # frame = cv2.drawMarker(
-                #     img=frame,
-                #     position = (int(x),int(y)),
-                #     color=(255,255,255),
-                #     markerType=cv2.MARKER_CROSS,
-                #     markerSize= 23,
-                #     thickness= 3,
-                #     line_type=8
-                # )
-                # frame = cv2.drawMarker(
-                #     img=frame,
-                #     position = (int(x),int(y)),
-                #     color=(120,10,120),
-                #     markerType=cv2.MARKER_CROSS,
-                #     markerSize= 20,
-                #     thickness= 3,
-                #     line_type=8
-                # )
+                    cv2.circle(
+                    img=frame,
+                    center=(int(x), int(y)),
+                    radius=12,
+                    color=(120,10,120),
+                    thickness=-1,
+                    lineType=cv2.LINE_AA
+                    )
+                    if confidence_display:
+                        X_top_box = int(x)-7
+                        Y_top_box = int(y)-15
+                        X_bottom_box = int(x)+65
+                        Y_bottom_box = int(y)+4
+
+
+                        #background rectangle for the confidence score display per joint
+                        cv2.rectangle(
+                            img=frame,
+                            pt1=(X_top_box,Y_top_box), # top left corner
+                            pt2=(X_bottom_box,Y_bottom_box),#bottom right corner
+                            color=(255,255,255),
+                            thickness=-1,
+                            lineType=cv2.LINE_AA
+                        )
+                        #confidence score display per joint
+                        cv2.putText(
+                            img=frame,
+                            text=f'{conf}',
+                            org=(int(x)-5,int(y)),
+                            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=0.5,
+                            color=(0, 0, 0),
+                            thickness=1,
+                            lineType=cv2.LINE_AA,
+                            bottomLeftOrigin=False
+                        )
+                    '''
+                    # frame = cv2.drawMarker(
+                    #     img=frame,
+                    #     position = (int(x),int(y)),
+                    #     color=(255,255,255),
+                    #     markerType=cv2.MARKER_CROSS,
+                    #     markerSize= 23,
+                    #     thickness= 3,
+                    #     line_type=8
+                    # )
+                    # frame = cv2.drawMarker(
+                    #     img=frame,
+                    #     position = (int(x),int(y)),
+                    #     color=(120,10,120),
+                    #     markerType=cv2.MARKER_CROSS,
+                    #     markerSize= 20,
+                    #     thickness= 3,
+                    #     line_type=8
+                    # )
+                    ###############################################
     print(Fore.BLUE + f"Plotting joints output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
@@ -185,10 +243,11 @@ def drawing_links(people, link_mae, frame, linkwidth: int):
     """
     Plot the line of the links based on a treshold value for color
     """
+    face_ignored = people[0].face_ignored
     start=time.time()
     for person in people:
-        for link in person.links:
-            mae = link_mae[link.id]
+        for i, link in enumerate(person.links):
+            mae = link_mae[i]
             if mae>=30:
                 link.set_color((28,25,215))# red in BGR channel (opencv swap the channels)
             elif mae>=20:
@@ -246,19 +305,20 @@ def add_frame_text(frame, count: int):
                        bottomLeftOrigin=False)
 
 
-def calculate_score(keypoints , number_of_people):
+def calculate_score(keypoints , number_of_people, face_ignored):
     """
     Calculate the angles between joints given the keypoints.
     Give a similariy score for the the frame.
     """
     start = time.time()
-    people =  data_to_people(keypoints , number_of_people)
+    people =  data_to_people(keypoints , number_of_people, face_ignored)
     link_mae, frame_score, worst_link_name, worst_link_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
     return people, link_mae, frame_score , worst_link_name , worst_link_score
 
 
-def predict_on_stream (vid, writer, model, width, height, dancers):
+def predict_on_stream (vid, writer, model, width: int, height :int,
+                       dancers:int, face_ignored:bool):
     """
 
     """
@@ -286,7 +346,12 @@ def predict_on_stream (vid, writer, model, width, height, dancers):
             #print(keypoints)
             #Calculate scores
 
-            people, link_mae, frame_score, worst_link_name, worst_link_score  = calculate_score(keypoints , number_of_people=dancers)
+            people, link_mae, frame_score, worst_link_name, \
+                worst_link_score  = calculate_score(
+                    keypoints=keypoints,
+                    number_of_people=dancers,
+                    face_ignored=face_ignored
+                    )
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
@@ -297,7 +362,8 @@ def predict_on_stream (vid, writer, model, width, height, dancers):
             #frame = cv2.flip(frame,0)
             image = drawing_links(people, link_mae, image, linkwidth=6)
             frame_mask = image.copy()
-            frame_mask = drawing_joints(keypoints, number_people=dancers, frame=frame_mask)
+            people = all_people[count]
+            frame_mask = drawing_joints(keypoints, people=people, frame=frame_mask)
 
             frame_superposition = cv2.addWeighted(src1=frame,
                                                   alpha=0.35,
