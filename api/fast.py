@@ -100,7 +100,7 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers)
         'output_url': vid_blob.public_url,
         'timestamps': list(timestamps),
         'scores': all_scores,
-        'my_uuid': my_uuid
+        'my_uuid': my_uuid,
         'link_scores': worst_link_scores,
         'link_names': worst_link_names
     }
