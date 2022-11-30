@@ -33,7 +33,7 @@ vid, writer, fps, \
                                                   output_name="output_stream_3")
 vid , all_scores, all_people, all_link_mae , worst_link_scores, \
     worst_link_names = predict_on_stream(vid, writer, model, width, height, 2,\
-        face_ignored=True, conf_threshold=0.20)
+        face_ignored=True, conf_threshold=0.20, confidence_display=False)
 timeline = np.arange(frame_count)/fps #time in seconds
 
 print(all_scores)

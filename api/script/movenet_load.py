@@ -192,7 +192,6 @@ def drawing_links(people, link_mae, frame, linkwidth: int):
     """
     Plot the line of the links based on a treshold value for color
     """
-    face_ignored = people[0].face_ignored
     start=time.time()
     for person in people:
         for i, link in enumerate(person.links):
@@ -202,12 +201,12 @@ def drawing_links(people, link_mae, frame, linkwidth: int):
             elif mae>=20:
                 link.set_color((97,174,253))
             elif mae>=10:
-                link.set_color((191,255,255))
+                link.set_color((50,255,212))
             elif mae>=5:
-                link.set_color((106,217,166))
+                link.set_color((50,255,212))
 
             else:
-                link.set_color((65,150,26))
+                link.set_color((162,255,0))
 
             x1 , y1 = int(link.joints[0].x), int(link.joints[0].y)
             x2 , y2 = int(link.joints[1].x), int(link.joints[1].y)
@@ -267,7 +266,8 @@ def calculate_score(keypoints , number_of_people:int, face_ignored:bool, conf_th
 
 
 def predict_on_stream (vid, writer, model, width: int, height :int,
-                       dancers:int, face_ignored:bool, conf_threshold:float):
+                       dancers:int, face_ignored:bool, conf_threshold:float,
+                       confidence_display:bool):
     """
 
     """
@@ -325,12 +325,15 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
                 image = drawing_links(people, link_mae, image, linkwidth=6)
                 frame_mask = image.copy()
                 people = all_people[count]
-                frame_mask = drawing_joints(keypoints, people=people, frame=frame_mask)
+                frame_mask = drawing_joints(keypoints,
+                                            people=people,
+                                            frame=frame_mask,
+                                            confidence_display=confidence_display)
 
                 frame_superposition = cv2.addWeighted(src1=frame,
-                                                    alpha=0.35,
+                                                    alpha=0.20,
                                                     src2=frame_mask,
-                                                    beta=0.65,
+                                                    beta=0.80,
                                                     gamma=0)
 
 
