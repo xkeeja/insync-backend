@@ -73,18 +73,25 @@ def data_to_people(keypoints: list, number_of_people:int, face_ignored:bool):
 
 
 
-def similarity_scorer(people:list):
+def similarity_scorer(people:list, conf_threshold:float):
     """
     Takes list of person objects
     Returns list of mean absolute error between angles for each link
     Returns overall frame score
     """
     number_of_people = len(people)
-    number_of_links = range(len(people[0].links))
+    number_of_links = len(people[0].links)
+    ignore_for_drawing=False
+
+    # checking if in any min confidence score of any person below the threshold
+    for person in people:
+        if person.min_confidence() < conf_threshold:
+                ignore_for_drawing=True
+                return [None]*number_of_links, None, None, None, ignore_for_drawing
 
     if number_of_people ==2:
         link_mae =[]
-        for link_id in number_of_links:
+        for link_id in range(number_of_links):
             link_mae.append(abs(people[0].angles()[link_id]- people[1].angles()[link_id]))
 
     else:
@@ -103,4 +110,5 @@ def similarity_scorer(people:list):
     worst_link_score = max(link_mae)
     worst_link_name = link_def[np.argmax(link_mae)][0]
 
-    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score
+
+    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score, ignore_for_drawing

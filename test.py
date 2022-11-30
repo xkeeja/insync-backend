@@ -31,9 +31,17 @@ vid, writer, fps, \
     frame_count, width, height = load_video_and_release("dancingvid.mp4",
                                                   output_format="mp4",
                                                   output_name="output_stream_3")
-vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names = predict_on_stream(vid, writer, model, width, height)
+vid , all_scores, all_people, all_link_mae , worst_link_scores, \
+    worst_link_names = predict_on_stream(vid, writer, model, width, height, 2,\
+        face_ignored=True, conf_threshold=0.20)
 timeline = np.arange(frame_count)/fps #time in seconds
 
 print(all_scores)
+print(all_link_mae)
 print(worst_link_scores)
 print(worst_link_names)
+a = np.array(all_scores)
+num_not_analysed_frames = len(a[a==None])
+per = round(num_not_analysed_frames *100/ frame_count, 1)
+
+print(f"out of {frame_count}, {num_not_analysed_frames} ({per}) were not analysed")
