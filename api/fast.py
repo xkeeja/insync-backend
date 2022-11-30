@@ -66,11 +66,12 @@ def stats_to_st(file: UploadFile = File(...)):
 
 
 @app.get("/vid_process")
-def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers):
+def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers, face_ignored, conf_threshold):
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
 
     #return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
-    vid, all_scores, _, _, worst_link_scores, worst_link_names, face_ignored, conf_threshold = predict_on_stream(vid, writer, app.state.model, int(width), int(height), int(dancers))
+    vid, all_scores, _, _, worst_link_scores, worst_link_names = predict_on_stream(vid, writer, app.state.model, int(width), int(height), 
+                                                                                    int(dancers), face_ignored, conf_threshold)
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
 
     # compress video output to smaller size
@@ -103,6 +104,4 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers)
         'my_uuid': my_uuid,
         'link_scores': worst_link_scores,
         'link_names': worst_link_names,
-        'face_ignored': face_ignored,
-        'conf_threshold': conf_threshold
     }
