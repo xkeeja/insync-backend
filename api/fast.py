@@ -71,7 +71,7 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers,
 
     #return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
     vid, all_scores, _, _, worst_link_scores, worst_link_names = predict_on_stream(vid, writer, app.state.model, int(width), int(height), 
-                                                                                    int(dancers), face_ignored, conf_threshold)
+                                                                                    int(dancers), face_ignored, float(conf_threshold))
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
 
     # compress video output to smaller size
