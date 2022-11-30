@@ -103,4 +103,16 @@ def similarity_scorer(people:list):
     worst_link_score = max(link_mae)
     worst_link_name = link_def[np.argmax(link_mae)][0]
 
-    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score
+    #Find lowest confidence score in frame
+    lowest_confidence_score =1
+    for person in people:
+        for joint in person.joints:
+            score  = joint.confidence
+            if score<lowest_confidence_score:
+                lowest_confidence_score = score
+
+
+
+
+
+    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score , lowest_confidence_score

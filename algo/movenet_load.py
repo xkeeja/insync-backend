@@ -222,9 +222,9 @@ def calculate_score(keypoints , number_of_people):
     """
     start = time.time()
     people =  data_to_people(keypoints , number_of_people)
-    link_mae, frame_score, worst_link_name, worst_link_score = similarity_scorer(people)
+    link_mae, frame_score, worst_link_name, worst_link_score, lowest_confidence_score = similarity_scorer(people)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return people, link_mae, frame_score , worst_link_name , worst_link_score
+    return people, link_mae, frame_score , worst_link_name , worst_link_score , lowest_confidence_score
 
 
 def predict_on_stream (vid, writer, model, width, height):
@@ -250,7 +250,7 @@ def predict_on_stream (vid, writer, model, width, height):
             #print(keypoints)
             #Calculate scores
 
-            people, link_mae, frame_score ,worst_link_name , worst_link_score  = calculate_score(keypoints , number_of_people=2)
+            people, link_mae, frame_score ,worst_link_name , worst_link_score , lowest_confidence_score = calculate_score(keypoints , number_of_people=2)
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
