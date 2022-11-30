@@ -165,58 +165,7 @@ def drawing_joints(keypoints, people , frame, confidence_display=True):
                                 bottomLeftOrigin=False
                             )
                 #########################################################
-                '''
-                print("plotting ", person.id)
-                x_vals = keypoints[person_id,:,1]
-                y_vals = keypoints[person_id,:,0]
-                conf_vals = np.round(keypoints[person_id,:,2],4)
-                #print (x_vals, type(x_vals))
-                for i, (x,y,conf) in enumerate(zip(x_vals, y_vals, conf_vals)):
-                    cv2.circle(
-                    img=frame,
-                    center=(int(x), int(y)),
-                    radius=14,
-                    color=(255,255,255),
-                    thickness=-1,
-                    lineType=cv2.LINE_AA
-                    )
-                    cv2.circle(
-                    img=frame,
-                    center=(int(x), int(y)),
-                    radius=12,
-                    color=(120,10,120),
-                    thickness=-1,
-                    lineType=cv2.LINE_AA
-                    )
-                    if confidence_display:
-                        X_top_box = int(x)-7
-                        Y_top_box = int(y)-15
-                        X_bottom_box = int(x)+65
-                        Y_bottom_box = int(y)+4
 
-
-                        #background rectangle for the confidence score display per joint
-                        cv2.rectangle(
-                            img=frame,
-                            pt1=(X_top_box,Y_top_box), # top left corner
-                            pt2=(X_bottom_box,Y_bottom_box),#bottom right corner
-                            color=(255,255,255),
-                            thickness=-1,
-                            lineType=cv2.LINE_AA
-                        )
-                        #confidence score display per joint
-                        cv2.putText(
-                            img=frame,
-                            text=f'{conf}',
-                            org=(int(x)-5,int(y)),
-                            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                            fontScale=0.5,
-                            color=(0, 0, 0),
-                            thickness=1,
-                            lineType=cv2.LINE_AA,
-                            bottomLeftOrigin=False
-                        )
-                    '''
                     # frame = cv2.drawMarker(
                     #     img=frame,
                     #     position = (int(x),int(y)),
@@ -292,33 +241,33 @@ def drawing_links(people, link_mae, frame, linkwidth: int):
     return frame
 
 
-def add_frame_text(frame, count: int):
+def add_frame_text(frame, count: int, color:tuple):
     font = cv2.FONT_HERSHEY_SIMPLEX
     return cv2.putText(img=frame,
                        text=f'{count}',
                        org=(10,50),
                        fontFace=font,
                        fontScale=2,
-                       color=(0, 255, 0),
+                       color=color,
                        thickness=2,
                        lineType=cv2.LINE_AA,
                        bottomLeftOrigin=False)
 
 
-def calculate_score(keypoints , number_of_people, face_ignored):
+def calculate_score(keypoints , number_of_people:int, face_ignored:bool, conf_threshold:float):
     """
     Calculate the angles between joints given the keypoints.
     Give a similariy score for the the frame.
     """
     start = time.time()
     people =  data_to_people(keypoints , number_of_people, face_ignored)
-    link_mae, frame_score, worst_link_name, worst_link_score = similarity_scorer(people)
+    link_mae, frame_score, worst_link_name, worst_link_score, ignore_for_display = similarity_scorer(people, conf_threshold)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return people, link_mae, frame_score , worst_link_name , worst_link_score
+    return people, link_mae, frame_score , worst_link_name , worst_link_score, ignore_for_display
 
 
 def predict_on_stream (vid, writer, model, width: int, height :int,
-                       dancers:int, face_ignored:bool):
+                       dancers:int, face_ignored:bool, conf_threshold:float):
     """
 
     """
@@ -327,13 +276,14 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
     all_link_mae = []
     worst_link_scores =[]
     worst_link_names =[]
+    frame_is_ignored_list=[]
     count = 0
-    
+
     # clean screencaps folder
     files = glob.glob(f"{os.path.abspath('.')}/api/screencaps/*.jpg")
     for f in files:
         os.remove(f)
-    
+
     while(vid.isOpened()):
         ret, frame = vid.read()
         if ret==True:
@@ -347,37 +297,49 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
             #Calculate scores
 
             people, link_mae, frame_score, worst_link_name, \
-                worst_link_score  = calculate_score(
+                worst_link_score, ignore_for_display = calculate_score(
                     keypoints=keypoints,
                     number_of_people=dancers,
-                    face_ignored=face_ignored
+                    face_ignored=face_ignored,
+                    conf_threshold=conf_threshold
                     )
             all_scores.append(frame_score)
             all_people.append(people)
             all_link_mae.append(link_mae)
             worst_link_scores.append(worst_link_score)
             worst_link_names.append(worst_link_name)
+            frame_is_ignored_list.append(ignore_for_display)
 
-            print(f"FRAME_SCORE{frame_score}, WORST LINK_NAME:{worst_link_name}, WORST LINK SCORE: {worst_link_score}")
-            #frame = cv2.flip(frame,0)
-            image = drawing_links(people, link_mae, image, linkwidth=6)
-            frame_mask = image.copy()
-            people = all_people[count]
-            frame_mask = drawing_joints(keypoints, people=people, frame=frame_mask)
-
-            frame_superposition = cv2.addWeighted(src1=frame,
-                                                  alpha=0.35,
-                                                  src2=frame_mask,
-                                                  beta=0.65,
-                                                  gamma=0)
-
-
-            frame_resize = cv2.resize(
-                    frame_superposition,
+            if ignore_for_display:
+                frame_resize = cv2.resize(
+                    image,
                     (width, height),
                     interpolation=cv2.INTER_LANCZOS4
-            ) # OpenCV processes BGR images instead of RGB
-            frame_text = add_frame_text(frame_resize, count)
+                )
+                frame_text = add_frame_text(frame_resize, "not analysed", color=(0, 0, 255))
+
+            else:
+
+                print(f"FRAME_SCORE{frame_score}, WORST LINK_NAME:{worst_link_name}, WORST LINK SCORE: {worst_link_score}")
+                #frame = cv2.flip(frame,0)
+                image = drawing_links(people, link_mae, image, linkwidth=6)
+                frame_mask = image.copy()
+                people = all_people[count]
+                frame_mask = drawing_joints(keypoints, people=people, frame=frame_mask)
+
+                frame_superposition = cv2.addWeighted(src1=frame,
+                                                    alpha=0.35,
+                                                    src2=frame_mask,
+                                                    beta=0.65,
+                                                    gamma=0)
+
+
+                frame_resize = cv2.resize(
+                        frame_superposition,
+                        (width, height),
+                        interpolation=cv2.INTER_LANCZOS4
+                ) # OpenCV processes BGR images instead of RGB
+                frame_text = add_frame_text(frame_resize, count, color=(0, 255, 0))
 
             cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
             count += 1

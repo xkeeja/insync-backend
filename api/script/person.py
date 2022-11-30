@@ -1,7 +1,8 @@
 """
 module for visualisation
-
 """
+import numpy as np
+
 joint_def={
     0: ["nose", "", "black", False],
     1: ["eye", "left", "green", True],
@@ -47,6 +48,10 @@ class Joint:
         Inputs : confidence score from pose detection model for this joint
         outputs : joint itself with confidence scores updated
         '''
+        # if confidence <= 0.2:
+        #     self.bad_confidence = True
+        # else:
+        #     self.bad_confidence = False
         self.confidence = confidence
         return self
 
@@ -114,17 +119,6 @@ class Person:
         self.joints = [Joint(k, id) for k in range(17)]
 
     def update_joints(self, x_vect, y_vect, conf_vect):
-        # if self.face_on:
-        #     for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect):
-        #         if joint.included_in_face_mode==True:
-        #             joint.add_coord(x,y).add_confidence(confidence)
-        #         else:
-        #             continue
-
-        #     # self.joints = [joint.add_coord(x,y).add_confidence(confidence) \
-        #     #     if joint.included_in_face_mode==True else joint
-        #     #     for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect)]
-        # else :
         self.joints = [joint.add_coord(x,y).add_confidence(confidence) \
             for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect)]
         return self
@@ -154,3 +148,13 @@ class Person:
             return [joint.is_ignored for joint in self.joints ]
         else:
             return [False for _ in range(17)]
+
+    def min_confidence(self):
+        if self.face_ignored:
+            list_confidence = []
+            for joint in self.joints:
+                if joint.is_ignored == False:
+                    list_confidence.append(joint.confidence)
+            return np.min(list_confidence)
+        else:
+            return np.min([joint.confidence for joint in self.joints])
