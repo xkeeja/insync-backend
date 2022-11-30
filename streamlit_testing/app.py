@@ -15,7 +15,7 @@ from sklearn.preprocessing import MinMaxScaler
 st.set_page_config(page_title="in sync.")
 
 #load css
-with open('strealit_testing/style.css') as f:
+with open('streamlit_testing/style.css') as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 #animations
@@ -56,7 +56,7 @@ def processing(d):
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
-            
+
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
@@ -117,9 +117,9 @@ def main():
 
             show_vid.empty()
             st.text('')
-            
+
             if st.session_state.response is not None:
-                response = st.session_state.response 
+                response = st.session_state.response
             else:
                 #clear caches
                 fetch_stats.clear()
@@ -127,7 +127,7 @@ def main():
                 with st_lottie_spinner(lottie_model_loading, key='xd'):
                     response = processing(stats)
                 st.session_state.response = response
-            
+
             #Empty space
             st.text('')
 
@@ -146,18 +146,18 @@ def main():
             }
             df = pd.DataFrame(d)
             df['frames'] = df.index
-            
+
             windows = df['Error'].rolling(window=9)
             windows_list = []
             for window in windows:
                 windows_list.append(np.mean(window))
-                windows_list = np.array(windows_list)
-                    
-            df['Smoothed_error'] = windows_list
-            
+            windows_array = np.array(windows_list)
+
+            df['Smoothed_error'] = windows_array
+
             # df['Smoothed_error'] = df['Error'].rolling(window=9).mean()
             df['Smoothed_link_error'] = df['Link_scores'].rolling(window=9).mean()
-            
+
             #graph on-click
             def go_to_frame(trace, points, selector):
                 # index = df.index[df['Time']==].tolist()
@@ -200,7 +200,7 @@ def main():
             with b:
                 video_url = response['output_url']
                 st.video(video_url)
-            
+
             st.plotly_chart(fig, use_container_width=True)
             st.plotly_chart(fig2, use_container_width=True)
 
