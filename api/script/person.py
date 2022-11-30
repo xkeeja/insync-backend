@@ -3,23 +3,23 @@ module for visualisation
 
 """
 joint_def={
-    0: ["nose", "", "black"],
-    1: ["eye", "left", "green"],
-    2: ["eye", "right", "red"],
-    3: ["ear", "left", "green"],
-    4: ["ear", "right", "red"],
-    5 : ["shoulder", "left", "green"],
-    6 : ["shoulder", "right", "red"],
-    7 : ["elbow", "left", "green"],
-    8 : ["elbow", "right", "red"],
-    9 : ["wrist", "left", "green"],
-    10 : ["wrist", "right", "red"],
-    11 : ["hip", "left", "green"],
-    12 :["hip", "right", "red"],
-    13 : ["knee", "left", "green"],
-    14 :["knee", "right", "red"],
-    15 : ["foot", "left", "green"],
-    16: ["foot", "right", "red"]
+    0: ["nose", "", "black", False],
+    1: ["eye", "left", "green", True],
+    2: ["eye", "right", "red", True],
+    3: ["ear", "left", "green", True],
+    4: ["ear", "right", "red", True],
+    5 : ["shoulder", "left", "green", False],
+    6 : ["shoulder", "right", "red", False],
+    7 : ["elbow", "left", "green", False],
+    8 : ["elbow", "right", "red", False],
+    9 : ["wrist", "left", "green", False],
+    10 : ["wrist", "right", "red", False],
+    11 : ["hip", "left", "green", False],
+    12 :["hip", "right", "red", False],
+    13 : ["knee", "left", "green", False],
+    14 :["knee", "right", "red", False],
+    15 : ["foot", "left", "green", False],
+    16: ["foot", "right", "red", False]
 }
 
 class Joint:
@@ -29,6 +29,7 @@ class Joint:
         self.id = id
         self.name = " ".join(joint_def[id][0:2])
         self.color = joint_def[id][2]
+        self.is_ignored = joint_def[id][3]
         self.x = None # intented to be a float x coordinate
         self.y = None # intented to be a float y coordinate
 
@@ -54,22 +55,24 @@ class Joint:
 x = Joint(1, 3)
 
 link_def= {
-    0 : ["right ear to right eye", (4,2),""],
-    1 : ["right eye to nose", (2,0), ""],
-    2 : ["nose to left eye", (0,1), ""],
-    3 : ["left eye to left ear", (1,3), ""],
-    4 : ["left shoulder to right shoulder", (5,6), "chest line"],
-    5 : ["right elbow to right shoulder ", (6,8), "right arm"],
-    6 : ["right elbow to right wrist", (8,10), "right forearm"],
-    7 : ["left shoulder to left elbow", (5,7), "left arm"],
-    8 : ["left elbow to left wrist", (7,9), "left forearm"],
-    9 : ["right shoulder to right hip", (6,12), "suspender right"],
-    10 : ["left shoulder to left hip", (5,11), "suspender left"],
-    11 : ["left hip to right hip", (11,12), "belt"],
-    12 : ["right hip to right knee", (12,14), "right thigh"],
-    13 : ["right knee to right foot", (14,16), "right calf"],
-    14 : ["left hip to left knee", (11,13), "left thigh"],
-    15 : ["left knee to left foot", (13,15), "left calf"]
+    0 : ["right ear to right eye", (4,2),"", False],
+    1 : ["right eye to nose", (2,0), "", False],
+    2 : ["nose to left eye", (0,1), "", False],
+    3 : ["left eye to left ear", (1,3), "", False],
+    4 : ["left shoulder to right shoulder", (5,6), "chest line", True],
+    5 : ["right elbow to right shoulder ", (6,8), "right arm", True],
+    6 : ["right elbow to right wrist", (8,10), "right forearm", True],
+    7 : ["left shoulder to left elbow", (5,7), "left arm", True],
+    8 : ["left elbow to left wrist", (7,9), "left forearm", True],
+    9 : ["right shoulder to right hip", (6,12), "suspender right", True],
+    10 : ["left shoulder to left hip", (5,11), "suspender left", True],
+    11 : ["left hip to right hip", (11,12), "belt", True],
+    12 : ["right hip to right knee", (12,14), "right thigh", True],
+    13 : ["right knee to right foot", (14,16), "right calf", True],
+    14 : ["left hip to left knee", (11,13), "left thigh", True],
+    15 : ["left knee to left foot", (13,15), "left calf", True],
+    16 : ["nose to left shoulder", (0,5), "nose left", True],
+    17 : ["nose to right shoulder", (0,6), "nose right", True]
     }
 
 
@@ -105,22 +108,49 @@ class Link:
 
 class Person:
 
-    def __init__(self, id:int):
+    def __init__(self, id:int, face_ignored :bool):
         self.id = id
+        self.face_ignored = face_ignored
         self.joints = [Joint(k, id) for k in range(17)]
 
     def update_joints(self, x_vect, y_vect, conf_vect):
+        # if self.face_on:
+        #     for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect):
+        #         if joint.included_in_face_mode==True:
+        #             joint.add_coord(x,y).add_confidence(confidence)
+        #         else:
+        #             continue
+
+        #     # self.joints = [joint.add_coord(x,y).add_confidence(confidence) \
+        #     #     if joint.included_in_face_mode==True else joint
+        #     #     for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect)]
+        # else :
         self.joints = [joint.add_coord(x,y).add_confidence(confidence) \
             for joint ,x, y, confidence in zip(self.joints, x_vect, y_vect, conf_vect)]
         return self
 
     def create_links(self):
-        self.links_empty = [Link(k, self.id) for k in range(16)]
+        if self.face_ignored:
+            self.links_empty=[]
+            for key, val in link_def.items():
+                print(key,val[3])
+                if val[3]: #filter for face mode off
+                   self.links_empty.append(Link(key, self.id))
+
+        else:
+            self.links_empty = [Link(k, self.id) for k in range(16)]
         self.links = [link.add_joints(
             self.joints[link.joint1_id],
             self.joints[link.joint2_id]
-            ) for link in self.links_empty]
+            ) for link in self.links_empty
+        ]
         return self
 
     def angles(self):
         return [link.angle for link in self.links]
+
+    def joints_to_not_be_displayed(self):
+        if self.face_ignored:
+            return [joint.is_ignored for joint in self.joints ]
+        else:
+            return [False for _ in range(17)]

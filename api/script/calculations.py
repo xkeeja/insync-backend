@@ -47,7 +47,7 @@ def calculate_angle( joint1:Joint, joint2:Joint):
 
 
 
-def data_to_people(keypoints: list, number_of_people:int):
+def data_to_people(keypoints: list, number_of_people:int, face_ignored:bool):
     """
     Returns list of people objects with coordinates, confidence and angles assigned to joints and links.
     """
@@ -56,7 +56,7 @@ def data_to_people(keypoints: list, number_of_people:int):
     keypoints= np.array(keypoints)
     for person_id in range(number_of_people):
         #Instantiate person
-        person = Person(person_id)
+        person = Person(person_id, face_ignored)
         #Assign all the coordinates and confidence to the person
         person.update_joints(keypoints[person_id,:,1], keypoints[person_id,:,0],keypoints[person_id,:,2])
         person.create_links()
