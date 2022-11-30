@@ -127,7 +127,6 @@ class Person:
         if self.face_ignored:
             self.links_empty=[]
             for key, val in link_def.items():
-                print(key,val[3])
                 if val[3]: #filter for face mode off
                    self.links_empty.append(Link(key, self.id))
 
