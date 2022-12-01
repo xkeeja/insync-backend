@@ -51,8 +51,8 @@ def display_dial(title, value, color):
 
 @st.experimental_memo
 def processing(d):
-    # url = "http://127.0.0.1:8000/vid_process"
-    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_process"
+    url = "http://127.0.0.1:8000/vid_process"
+    # url = "https://syncv9-eagwezifvq-an.a.run.app/vid_process"
     params = {k:d[k] for k in d if k!='dim'}
     response = requests.get(url, params=params).json()
     return response
@@ -60,8 +60,8 @@ def processing(d):
 
 @st.experimental_memo
 def fetch_stats(uploaded_video):
-    url = "https://syncv9-eagwezifvq-an.a.run.app/vid_stats"
-    # url = "http://127.0.0.1:8000/vid_stats"
+    # url = "https://syncv9-eagwezifvq-an.a.run.app/vid_stats"
+    url = "http://127.0.0.1:8000/vid_stats"
     files = {"file": (uploaded_video.name, uploaded_video, "multipart/form-data")}
     stats = requests.post(url, files=files).json()
     return stats
@@ -166,10 +166,10 @@ def main():
 
             # fig = go.FigureWidget([go.Line(x=d['Time'], y=d['Error'])])
             # image_placeholder = st.empty()
-            fig = px.line(df, x='frames', y='Smoothed_error', title='Synchronisation Analysis',
+            fig = px.line(df, x='frames', y='Smoothed_error', title='synchronisation analysis',
                             hover_name='frames', labels={
-                                                     "frames": "Frame Number",
-                                                     "Smoothed_error": "Mean Absolute Error",
+                                                     "frames": "frame number",
+                                                     "Smoothed_error": "sync error",
                                                     },
                     )
             fig.update_xaxes(showgrid=False)
@@ -178,10 +178,10 @@ def main():
             fig = go.FigureWidget(fig.data, fig.layout)
             fig.data[0].on_click(go_to_frame)
 
-            fig2 = px.line(df, x='frames', y='Smoothed_link_error', title='Worst Actions',
+            fig2 = px.line(df, x='frames', y='Smoothed_link_error', title='largest body part error',
                             hover_name='Link_names', labels={
-                                                     "frames": "Frame Number",
-                                                     "Smoothed_link_error": "Max Error Body Part",
+                                                     "frames": "frame number",
+                                                     "Smoothed_link_error": "max error of body part",
                                                     },
                     )
             fig2.update_xaxes(showgrid=False)
