@@ -81,13 +81,18 @@ def similarity_scorer(people:list, conf_threshold:float):
     """
     number_of_people = len(people)
     number_of_links = len(people[0].links)
-    ignore_for_drawing=False
+    # ignore_for_drawing=False
+    ignore_frame=False
 
     # checking if in any min confidence score of any person below the threshold
     for person in people:
         if person.min_confidence() < conf_threshold:
-                ignore_for_drawing=True
-                return [None]*number_of_links, None, None, None, ignore_for_drawing
+            # ignore_for_drawing=True
+            # return [None]*number_of_links, None, None, None, ignore_for_drawing
+            
+            ignore_frame=True
+            if ignore_frame==True:
+                break
 
     if number_of_people ==2:
         link_mae =[]
@@ -111,4 +116,4 @@ def similarity_scorer(people:list, conf_threshold:float):
     worst_link_name = link_def[np.argmax(link_mae)][0]
 
 
-    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score, ignore_for_drawing
+    return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score, ignore_frame

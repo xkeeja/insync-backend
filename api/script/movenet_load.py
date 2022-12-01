@@ -260,9 +260,9 @@ def calculate_score(keypoints , number_of_people:int, face_ignored:bool, conf_th
     """
     start = time.time()
     people =  data_to_people(keypoints , number_of_people, face_ignored)
-    link_mae, frame_score, worst_link_name, worst_link_score, ignore_for_display = similarity_scorer(people, conf_threshold)
+    link_mae, frame_score, worst_link_name, worst_link_score, ignore_frame = similarity_scorer(people, conf_threshold)
     print(Fore.BLUE + f"Scoring completed in: {time.time()-start}s" + Style.RESET_ALL)
-    return people, link_mae, frame_score , worst_link_name , worst_link_score, ignore_for_display
+    return people, link_mae, frame_score , worst_link_name , worst_link_score, ignore_frame
 
 
 def predict_on_stream (vid, writer, model, width: int, height :int,
@@ -353,4 +353,4 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
 
     writer.release()
 
-    return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
+    return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names, frame_is_ignored_list

@@ -70,8 +70,7 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers,
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
 
     #return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
-    vid, all_scores, _, _, worst_link_scores, worst_link_names = predict_on_stream(vid, writer, app.state.model, int(width), int(height), 
-                                                                                    int(dancers), face_ignored, float(conf_threshold))
+    vid, all_scores, _, _, worst_link_scores, worst_link_names, ignore_frame = predict_on_stream(vid, writer, app.state.model, int(width), int(height), int(dancers), face_ignored, float(conf_threshold), confidence_display=True)
     timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
 
     # compress video output to smaller size
@@ -104,4 +103,5 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers,
         'my_uuid': my_uuid,
         'link_scores': worst_link_scores,
         'link_names': worst_link_names,
+        'scores_bool': ignore_frame
     }
