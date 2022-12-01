@@ -108,7 +108,8 @@ def similarity_scorer(people:list, conf_threshold:float):
     #Other frame metrics
     frame_score = np.mean(link_mae)
     worst_link_score = max(link_mae)
-    worst_link_name = link_def[np.argmax(link_mae)][0]
+    #worst_link_name = link_def[np.argmax(link_mae)][0]
+    worst_link_name = people[0].links[np.argmax(link_mae)].name
 
 
     return np.array(link_mae) , frame_score,  worst_link_name , worst_link_score, ignore_for_drawing
