@@ -99,7 +99,7 @@ def predict(model, input_image):
     print(Fore.BLUE + f"Prediction and keypoint output in: {time.time()-start}s" + Style.RESET_ALL)
     return keypoints
 
-def drawing_joints(keypoints, people , frame, confidence_display=True):
+def drawing_joints(keypoints, people , frame, confidence_display):
     """
     Plot the positions of the joints on a frame.
     """
