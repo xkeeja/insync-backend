@@ -1,8 +1,5 @@
-##############################################
-#   LE WAGON BASE
-#############################################
 # packaging
-pip>=9
+pip
 setuptools>=26
 twine
 wheel>=0.29
@@ -10,7 +7,6 @@ wheel>=0.29
 # data science
 numpy
 pandas
-#scikit-learn
 
 # tests/linter
 black
@@ -20,10 +16,7 @@ pytest
 yapf
 
 # API
-#gcsfs
-#google-cloud-storage
-#mlflow
-#s3fs
+google-cloud-storage
 
 # utilities
 six>=1.14
@@ -31,37 +24,20 @@ joblib
 memoized-property
 termcolor
 
-############################################
-#  IN_SYNC SPECIFIC BASE
-#############################################
-
-#COmmand In Line visualisation
+# command in line visualisation
 colorama
 
-# API
-## Video stream management
-opencv-python==4.6.0.66
-## API management
+## API deployment
 fastapi
 uvicorn
-## Allow video gfile manipulayion to send through API (need on API sise and front-end)
+
+## allow video gfile manipulation to send through API (need on API side and front-end)
 python-multipart
 
-
-#Deep Learning
-
+# deep learning
+opencv-python
 tensorflow-hub
-# Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
+
 tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
 tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
 tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
-
-
-#encoding
-chardnet==5.0.0
-
-#streamlit
-streamlit
-plotly
-htbuilder
-streamlit_lottie
