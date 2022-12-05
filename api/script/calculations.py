@@ -1,5 +1,5 @@
 import numpy as np
-from api.script.person import Joint, Link , Person , link_def
+from api.script.person import Joint, Person
 
 """Module for algorithm calculations."""
 
@@ -13,7 +13,6 @@ def calculate_angle( joint1:Joint, joint2:Joint):
     """
     x1, y1 = joint1.x  , joint1.y
     x2, y2 = joint2.x , joint2.y
-    #confidence1, confidence2= joint1_id[2], joint2_id[2]
 
     delta_x = x2-x1
     delta_y = y2-y1
@@ -54,17 +53,18 @@ def data_to_people(keypoints: list, number_of_people:int, face_ignored:bool):
     #Create list of person objects
     people = []
     keypoints= np.array(keypoints)
+    
     for person_id in range(number_of_people):
         #Instantiate person
         person = Person(person_id, face_ignored)
         #Assign all the coordinates and confidence to the person
         person.update_joints(keypoints[person_id,:,1], keypoints[person_id,:,0],keypoints[person_id,:,2])
         person.create_links()
+        
         for link in person.links:
             #Calculate angle
             link.add_angle(calculate_angle(link.joints[0], link.joints[1]))
-
-
+        
         people.append(person)
 
     return people
@@ -81,15 +81,11 @@ def similarity_scorer(people:list, conf_threshold:float):
     """
     number_of_people = len(people)
     number_of_links = len(people[0].links)
-    # ignore_for_drawing=False
     ignore_frame=False
 
     # checking if in any min confidence score of any person below the threshold
     for person in people:
         if person.min_confidence() < conf_threshold:
-            # ignore_for_drawing=True
-            # return [None]*number_of_links, None, None, None, ignore_for_drawing
-            
             ignore_frame=True
             if ignore_frame==True:
                 break
@@ -113,7 +109,6 @@ def similarity_scorer(people:list, conf_threshold:float):
     #Other frame metrics
     frame_score = np.mean(link_mae)
     worst_link_score = max(link_mae)
-    #worst_link_name = link_def[np.argmax(link_mae)][0]
     worst_link_name = people[0].links[np.argmax(link_mae)].name
 
 

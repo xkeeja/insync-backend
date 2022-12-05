@@ -28,25 +28,21 @@ def load_image(path : str):
     return image
 
 # Download the model from TF Hub.
-def load_model(mode:str ='local'):
+def load_model():
     """
-    load model from tensorflow hub and make it ready for porediction
-    input : 'hub' or 'local'
-    output : tensorflow model """
-
+    load model from tensorflow hub
+    """
     start=time.time()
-    if mode == 'hub':
-        model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
-        model = model.signatures['serving_default']
-    else:
-        model = tf.saved_model.load("../model/saved_model.pb")
+    model = hub.load("https://tfhub.dev/google/movenet/multipose/lightning/1")
+    model = model.signatures['serving_default']
     print(Fore.BLUE + f"model loads in: {time.time()-start}s" + Style.RESET_ALL)
+    
     return model
 
 
 def load_video_and_release(path : str, output_format: str, output_name :str):
     """
-
+    load video and define output format
     """
     # Conversion on the video in a opencv Videocapture (collection of frames)
     vid = cv2.VideoCapture(path)
@@ -164,27 +160,7 @@ def drawing_joints(keypoints, people , frame, confidence_display):
                                 lineType=cv2.LINE_AA,
                                 bottomLeftOrigin=False
                             )
-                #########################################################
-
-                    # frame = cv2.drawMarker(
-                    #     img=frame,
-                    #     position = (int(x),int(y)),
-                    #     color=(255,255,255),
-                    #     markerType=cv2.MARKER_CROSS,
-                    #     markerSize= 23,
-                    #     thickness= 3,
-                    #     line_type=8
-                    # )
-                    # frame = cv2.drawMarker(
-                    #     img=frame,
-                    #     position = (int(x),int(y)),
-                    #     color=(120,10,120),
-                    #     markerType=cv2.MARKER_CROSS,
-                    #     markerSize= 20,
-                    #     thickness= 3,
-                    #     line_type=8
-                    # )
-                    ###############################################
+                
     print(Fore.BLUE + f"Plotting joints output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
@@ -229,18 +205,14 @@ def drawing_links(people, link_mae, frame, linkwidth: int):
                 lineType=cv2.LINE_AA
             )
 
-            # frame = cv2.line(img=frame,
-            #                 pt1=(x1, y1),
-            #                 pt2=(x2, y2),
-            #                 color=link.color,
-            #                 thickness=5,
-            #                 lineType=cv2.LINE_AA
-            # )
     print(Fore.BLUE + f"Plotting link output made in: {time.time()-start}s" + Style.RESET_ALL)
     return frame
 
 
 def add_frame_text(frame, count: int, color:tuple):
+    """
+    Add frame number to frame
+    """
     font = cv2.FONT_HERSHEY_SIMPLEX
     return cv2.putText(img=frame,
                        text=f'{count}',
@@ -269,8 +241,9 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
                        dancers:int, face_ignored:bool, conf_threshold:float,
                        confidence_display:bool):
     """
-
+    Calculate synchronization scores & write frames to video
     """
+    
     all_scores = []
     all_people = []
     all_link_mae = []
@@ -288,16 +261,17 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
         ret, frame = vid.read()
         if ret==True:
             image = frame.copy()
-            #Preprocessing the image
+            
+            # Preprocessing the image
             input_image = preprocess_image(image, 256, 256)
-            # making prediction
+            
+            # Making prediction
             keypoints = predict(model, input_image)
             keypoints= np.squeeze(np.multiply(keypoints, [height,width,1]))
-            #print(keypoints)
-            #Calculate scores
-
+            
+            # Calculate scores
             people, link_mae, frame_score, worst_link_name, \
-                worst_link_score, ignore_for_display = calculate_score(
+                worst_link_score, ignore_frame = calculate_score(
                     keypoints=keypoints,
                     number_of_people=dancers,
                     face_ignored=face_ignored,
@@ -308,9 +282,10 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
             all_link_mae.append(link_mae)
             worst_link_scores.append(worst_link_score)
             worst_link_names.append(worst_link_name)
-            frame_is_ignored_list.append(ignore_for_display)
+            frame_is_ignored_list.append(ignore_frame)
 
-            if ignore_for_display:
+            # skip frame if confidence threshold failed
+            if ignore_frame:
                 frame_resize = cv2.resize(
                     image,
                     (width, height),
@@ -319,7 +294,6 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
                 frame_text = add_frame_text(frame_resize, "not analysed", color=(0, 0, 255))
 
             else:
-
                 print(f"FRAME_SCORE{frame_score}, WORST LINK_NAME:{worst_link_name}, WORST LINK SCORE: {worst_link_score}")
                 #frame = cv2.flip(frame,0)
                 image = drawing_links(people, link_mae, image, linkwidth=6)
@@ -341,12 +315,16 @@ def predict_on_stream (vid, writer, model, width: int, height :int,
                         frame_superposition,
                         (width, height),
                         interpolation=cv2.INTER_LANCZOS4
-                ) # OpenCV processes BGR images instead of RGB
+                ) 
+                
+                # OpenCV processes BGR images instead of RGB
                 frame_text = add_frame_text(frame_resize, count, color=(0, 255, 0))
 
+            # save frame as jpg
             cv2.imwrite(f"{os.path.abspath('.')}/api/screencaps/frame%d.jpg" % count, frame_text)
             count += 1
 
+            # write video
             writer.write(frame_text)
         else:
             break

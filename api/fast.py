@@ -11,7 +11,7 @@ from api.script.movenet_load import load_video_and_release, load_model, predict_
 
 
 app = FastAPI()
-app.state.model = load_model(mode='hub')
+app.state.model = load_model()
 
 
 # set up google cloud
@@ -47,6 +47,7 @@ def stats_to_st(file: UploadFile = File(...)):
         f.write(uploaded_video.read())
 
 
+    # video stats
     cap = cv2.VideoCapture(vid_name)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -67,11 +68,15 @@ def stats_to_st(file: UploadFile = File(...)):
 
 @app.get("/vid_process")
 def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers, face_ignored, conf_threshold, confidence_display):
+    
+    # load video
     vid, writer, _, _, _, _ = load_video_and_release(vid_name, output_format="mp4", output_name=output_name)
 
     #return vid , all_scores, all_people, all_link_mae , worst_link_scores , worst_link_names
     vid, all_scores, _, _, worst_link_scores, worst_link_names, ignore_frame = predict_on_stream(vid, writer, app.state.model, int(width), int(height), int(dancers), bool(face_ignored), float(conf_threshold), confidence_display=False)
-    timestamps = np.arange(int(frame_count))/int(fps) #time in seconds
+    
+    # time in seconds
+    timestamps = np.arange(int(frame_count))/int(fps)
 
     # compress video output to smaller size
     my_uuid = uuid.uuid4()
@@ -85,10 +90,12 @@ def process_vid(vid_name, output_name, frame_count, fps, width, height, dancers,
     vid_blob = bucket.blob(output_lite)
     vid_blob.upload_from_filename(output_lite)
 
+
     # # clean screencaps in google cloud storage
     # blobs = bucket.list_blobs(prefix='screencaps')
     # for blob in blobs:
     #     blob.delete()
+
 
     # upload screencaps to google cloud storage
     for i in range(int(frame_count)):
