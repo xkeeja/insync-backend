@@ -15,9 +15,8 @@ app.state.model = load_model()
 
 
 # set up google cloud
-SYNC_BUCKET = 'sync_testinput'
 gcs = storage.Client()
-bucket = gcs.get_bucket(SYNC_BUCKET)
+bucket = gcs.get_bucket(os.environ.get('BUCKET'))
 
 
 app.add_middleware(
