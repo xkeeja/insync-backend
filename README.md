@@ -1,14 +1,13 @@
 # 💃💃 in sync
-your personal AI synchronization assistant.
+Your personal AI synchronization assistant.
 <br>
 
 https://user-images.githubusercontent.com/113004083/206076584-8894fda5-c629-41f0-88f4-abdf5d016330.mp4
 
-_dance video sourced from Urban Dance Camp YouTube channel_
+_Dance video sourced from Urban Dance Camp YouTube channel._
 
 ## Application Frontend
-https://github.com/xkeeja/insync-frontend
-
+Project explained in further detail at https://github.com/xkeeja/insync-frontend.
 
 ## Getting Started
 ### Setup
