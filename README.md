@@ -1,73 +1,65 @@
-# Data analysis
-- Document here the project: in_sync
-- Description: Project Description
-- Data Source:
-- Type of analysis:
+# 💃💃 in sync
+your personal AI synchronization assistant.
+<br>
 
-Please document the project the better you can.
+https://user-images.githubusercontent.com/113004083/206076584-8894fda5-c629-41f0-88f4-abdf5d016330.mp4
 
-# Startup the project
+_dance video sourced from Urban Dance Camp YouTube channel_
 
-The initial setup.
+## Application Frontend
+https://github.com/xkeeja/insync-frontend
 
-Create virtualenv and install the project:
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
+
+## Getting Started
+### Setup
+
+Navigate to the base level of the repository
+```
+cd {your/path/here}/insync-backend
 ```
 
-Unittest test:
-```bash
-make clean install test
+Install package, requirements, & dependencies
+```
+pip install -U pip
+pip install .
 ```
 
-Check for in_sync in github.com/{group}. If your project is not set please add it:
-
-Create a new project on github.com/{group}/in_sync
-Then populate it:
-
-```bash
-##   e.g. if group is "{group}" and project_name is "in_sync"
-git remote add origin git@github.com:{group}/in_sync.git
-git push -u origin master
-git push -u origin --tags
+### ENV Variables
+Create `.env` file
+```
+touch .env
+```
+Inside `.env`, set these variables.
+```
+BUCKET=your_own_google_bucket_name
 ```
 
-Functionnal test with a script:
-
-```bash
-cd
-mkdir tmp
-cd tmp
-in_sync-run
+### Local API testing
+```
+make run_api
 ```
 
-# Install
-
-Go to `https://github.com/{group}/in_sync` to see the project, manage issues,
-setup you ssh public key, ...
-
-Create a python3 virtualenv and activate it:
-
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
+### Docker image for deployment
+```
+docker build -t {your_details_here} .
 ```
 
-Clone the project and install it:
+## Built With
+- [Python](https://www.python.org/) - Frontend & Backend
+- [Streamlit](https://streamlit.io/) - Frontend Deployment
+- [GCP](https://cloud.google.com/) - Storage & Backend Deployment
+- [TensorFlow](https://tfhub.dev/google/movenet/multipose/lightning/1) - Pose Detection Model
 
-```bash
-git clone git@github.com:{group}/in_sync.git
-cd in_sync
-pip install -r requirements.txt
-make clean install test                # install and test
-```
-Functionnal test with a script:
+## Acknowledgements
+Inspired by [Kanami](https://www.linkedin.com/in/kanami-oyama-9a666b243/)'s love of dance.
 
-```bash
-cd
-mkdir tmp
-cd tmp
-in_sync-run
-```
+## Team Members
+- Kanami Oyama ([GitHub](https://github.com/kanpinpon)) ([LinkedIn](https://www.linkedin.com/in/kanami-oyama-9a666b243/))
+- Jaylon Saville ([GitHub](https://github.com/jaysaville)) ([LinkedIn](https://www.linkedin.com/in/jaysaville/))
+- Vincent-Victor Rodriguez--Le Roy ([GitHub](https://github.com/Slokem)) ([LinkedIn](https://www.linkedin.com/in/vincent-victor-r-328aa5a8/))
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+This project is licensed under the MIT License
