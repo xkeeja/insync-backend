@@ -23,12 +23,29 @@ pip install -U pip
 pip install .
 ```
 
+Install ffmpeg for backend video compression
+
+_on linux_
+```
+sudo apt update
+sudo apt install ffmpeg
+```
+_on macOS_
+```
+brew install ffmpeg
+```
+_for other systems or direct download_
+
+https://ffmpeg.org/download.html
+
+
+
 ### ENV Variables
 Create `.env` file
 ```
 touch .env
 ```
-Inside `.env`, set these variables.
+Inside `.env`, set the following variables
 ```
 BUCKET=your_own_google_bucket_name
 ```
