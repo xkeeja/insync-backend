@@ -67,6 +67,7 @@ docker build -t {your_details_here} .
 ## Built With
 - [Python](https://www.python.org/) - Frontend & Backend
 - [Streamlit](https://streamlit.io/) - Frontend Deployment
+- [FastAPI](https://fastapi.tiangolo.com/) - API Framework
 - [GCP](https://cloud.google.com/) - Storage & Backend Deployment
 - [TensorFlow](https://tfhub.dev/google/movenet/multipose/lightning/1) - Pose Detection Model
 
